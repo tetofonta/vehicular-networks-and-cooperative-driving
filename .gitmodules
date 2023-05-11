@@ -1,0 +1,3 @@
+[submodule "cmake/omnetpp"]
+	path = cmake/omnetpp
+	url = https://github.com/omnetpp/cmake.git

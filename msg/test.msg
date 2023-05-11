@@ -1,0 +1,3 @@
+message TestMessage{
+    int test;
+}
