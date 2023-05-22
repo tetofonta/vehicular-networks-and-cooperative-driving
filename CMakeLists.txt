@@ -11,7 +11,14 @@ include(GenerateOppMessage)
 include(AddOppRun)
 include_directories(${OMNETPP_INCLUDE_DIR} ${VEINS_INCLUDE_DIR} ${PLEXE_INCLUDE_DIR} include)
 
-set(SOURCES src/MyPlatooningApp.cpp include/MyPlatooningApp.h)
+set(SOURCES
+        src/MyPlatooningApp.cpp
+        include/MyPlatooningApp.h
+        src/Scenario.cpp
+        include/Scenario.h
+        src/TrafficManager.cpp
+        include/TrafficManager.h
+        )
 set(MESSAGES msg/test.msg)
 
 add_library(libvncd SHARED ${SOURCES})

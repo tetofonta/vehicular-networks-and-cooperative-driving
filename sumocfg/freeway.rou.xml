@@ -30,8 +30,23 @@
 -->
 
 <routes>
-    <vType id="vtypeauto" accel="2.5" decel="9.0" sigma="0.5" length="4" minGap="0" maxSpeed="1000" color="1,0,0" probability="1" speedFactor="2"
-        carFollowModel="CC" tauEngine="0.5" omegaN="0.2" xi="1" c1="0.5" lanesCount="4" ccAccel="1.5" ploegKp="0.2" ploegKd="0.7" ploegH="0.5" />
-    <route id="platoon_route" edges="edge_0_0 edge_0_1 edge_0_2 edge_0_3 edge_1_0 edge_1_1 edge_1_2 edge_1_3 edge_2_0 edge_2_1 edge_2_2 edge_2_3 edge_3_0 edge_3_1 edge_3_2 edge_3_3 edge_4_0 edge_4_1 edge_4_4 edge_4_6 absorption_4"/>
-    <!--<flow id="platoon" route="platoon_route" type="vtypeauto" begin="0" period="1" departLane="0" number="8" departSpeed="27.77"/>-->
+    <vType id="vtypeauto" accel="2.5" decel="9.0" sigma="0.5" length="4" minGap="0" maxSpeed="200" color="1,0,0"
+           probability="1" speedFactor="2" carFollowModel="CC" tauEngine="0.5" omegaN="0.2" xi="1" c1="0.5"
+           lanesCount="3" ccAccel="1.5" ploegKp="0.2" ploegKd="0.7" ploegH="0.5"/>
+
+    <route id="platoon_route"
+           edges="edge_0_0 edge_0_1 edge_0_2 edge_0_3 edge_1_0 edge_1_1 edge_1_2 edge_1_3 edge_2_0 edge_2_1 edge_2_2 edge_2_3 edge_3_0 edge_3_1 edge_3_2 edge_3_3 edge_4_0 edge_4_1 edge_4_4 edge_4_6 absorption_4"/>
+
+<!--    <vType id="normal_car" vClass="passenger" maxSpeed="150" speedFactor="0.9" speedDev="0.2" sigma="0.5"/>-->
+<!--    <vType id="sporty_car" vClass="passenger" maxSpeed="270" speedFactor="1.6" speedDev="0.1" sigma="0.1"/>-->
+<!--    <vType id="trailer" vClass="trailer" maxSpeed="90" speedFactor="1" speedDev="0.05"/>-->
+<!--    <vType id="coach" vClass="coach" maxSpeed="30" speedFactor="1" speedDev="0.05"/>-->
+
+<!--    <flow id="normal" type="normal_car" begin="0" end="5000" number="5000" route="platoon_route" departSpeed="avg" departLane="best" />-->
+<!--    <flow id="sporty" type="sporty_car" begin="0" end="5000" number="300" route="platoon_route" departSpeed="avg" departLane="best" />-->
+<!--    <flow id="coach" type="coach" begin="0" end="5000" number="300" route="platoon_route" departSpeed="avg" departLane="best" />-->
+<!--    <flow id="trailer" type="trailer" begin="0" end="5000" number="700" route="platoon_route" departSpeed="avg" departLane="best" />-->
+
+<!--    <flow id="platoon" route="platoon_route" type="vtypeauto" begin="0" period="1" departLane="0" number="8" departSpeed="27.77"/>-->
+
 </routes>
