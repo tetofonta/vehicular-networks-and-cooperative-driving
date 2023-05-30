@@ -102,7 +102,7 @@ namespace plexe::vncd {
         msg->setPlatooning_speed_min(this->mobility->getSpeed() * 0.95);
         msg->setCan_be_leader(can_be_leader);
         msg->setKind(0x1234);
-        msg->setLane(0);
+        msg->setLane(this->mobility->getVehicleCommandInterface()->getLaneIndex());
         msg->setAddress(this->mobility->getId());
 
         this->sendPacket(msg);

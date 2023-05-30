@@ -90,7 +90,17 @@ namespace plexe::vncd {
                             this->isLeader = this->leaderExtraction > data->getLeaderExtraction();
                             this->app_protocol->stopSendingUnicast();
 
-                            
+                            //WE ARE GOOD TO GO!
+
+                            //leader this->isLeader
+                            //speed: min(max_speed(a), max_speed(b))
+                            //lane: min(lane(a), lane(b))
+
+                            //se sono il leader e sono dietro -> overtake maneuver -> go to negotiated lane (rightmost)
+                            //se non sono il leader -> sta fermo e non rompere
+                            //se sono il leader e sono davanti -> sta fermo e non rompere
+                            //leader send platoon_join_allowed
+                            //follower -> join platoon maneuver
 
                         } else {
                             this->app_protocol->stopSendingUnicast();
