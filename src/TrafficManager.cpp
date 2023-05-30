@@ -68,8 +68,8 @@ namespace plexe::vncd {
 
         //define the vehicle information as the leader of a 1 car platoon
         VehicleInfo vehicleInfo{
-                .controller = ACC,
-                .distance = 2,
+                .controller = DRIVER,
+                .distance = 1,
                 .headway = platoonLeaderHeadway,
                 .id = insertedCars,
                 .platoonId = insertedCars++,

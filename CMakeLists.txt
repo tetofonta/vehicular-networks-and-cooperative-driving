@@ -9,7 +9,7 @@ find_package(Plexe REQUIRED)
 
 include(GenerateOppMessage)
 include(AddOppRun)
-include_directories(${OMNETPP_INCLUDE_DIR} ${VEINS_INCLUDE_DIR} ${PLEXE_INCLUDE_DIR} include)
+include_directories(${OMNETPP_INCLUDE_DIR} ${VEINS_INCLUDE_DIR} ${PLEXE_INCLUDE_DIR} include ${CMAKE_BINARY_DIR}/msg)
 
 set(SOURCES
         src/MyPlatooningApp.cpp
@@ -18,12 +18,16 @@ set(SOURCES
         include/Scenario.h
         src/TrafficManager.cpp
         include/TrafficManager.h
+        src/PlatooningProtocol.cpp
+        include/Protocol.h
         )
-set(MESSAGES msg/test.msg)
 
 add_library(libvncd SHARED ${SOURCES})
 set_target_properties(libvncd PROPERTIES NED_FOLDERS networks:${VEINS_NED_DIR}:${PLEXE_NED_DIR})
 target_link_libraries(libvncd ${PLEXE_LINK_LIBRARY})
-generate_opp_message(${MESSAGES} TARGET libvncd)
+generate_opp_message(msg/PlatoonSearchCAM.msg TARGET libvncd)
+generate_opp_message(msg/PlatoonUnicast.msg TARGET libvncd)
+generate_opp_message(msg/PlatoonCreateRequest.msg TARGET libvncd)
+generate_opp_message(msg/PlatoonCreateAnswer.msg TARGET libvncd)
 
 add_opp_run(vncd DEPENDENCY libvncd WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})

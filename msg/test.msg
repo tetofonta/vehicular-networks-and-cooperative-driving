@@ -1,3 +1,0 @@
-message TestMessage{
-    int test;
-}
