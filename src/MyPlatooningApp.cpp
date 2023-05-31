@@ -39,6 +39,13 @@ namespace plexe::vncd {
 
     void MyPlatooningApp::handleSelfMsg(omnetpp::cMessage *p_msg) {
         BaseApp::handleSelfMsg(p_msg);
+
+        auto internalTimeout = dynamic_cast<InternalListenTimeout *>(p_msg);
+        if(internalTimeout != NULL){
+            auto msg = std::make_unique<InternalListenTimeout>(*internalTimeout);
+            this->events.erase(msg->getAddress());
+        }
+
         auto msg = std::make_unique<cMessage>(*p_msg);
     }
 
@@ -50,15 +57,30 @@ namespace plexe::vncd {
         switch (enc->getKind()) {
             case 0x1234: {
                 auto pkt = check_and_cast<PlatoonSearchCAM *>(frame->decapsulate());
-                if (this->isPlatooningCompatible(pkt) && this->negotiationAddress == -1) { //todo
-                    this->app_protocol->stopPlatoonFormationAdvertisement();
-                    auto response = new PlatoonCreateRequest();
-                    response->setType(PLATOON_CREATE_REQUEST);
+
+                int counts = 1;
+                auto msg = new InternalListenTimeout();
+                msg->setAddress(pkt->getAddress());
+                if(this->events.contains(pkt->getAddress())){
+                    cancelAndDelete( std::get<1>(this->events[pkt->getAddress()]));
+                    counts = std::get<0>(this->events[pkt->getAddress()]) + 1;
+                }
+
+                if(counts >= 3){
+                    this->events.erase(pkt->getAddress());
+                    if (this->isPlatooningCompatible(pkt) && this->negotiationAddress == -1) { //todo
+                        this->app_protocol->stopPlatoonFormationAdvertisement();
+                        auto response = new PlatoonCreateRequest();
+                        response->setType(PLATOON_CREATE_REQUEST);
 //                    response->setLeaderExtraction(this->leaderExtraction);
-                    response->setCoordinate(this->mobility->getPositionAt(simTime()).x);
-                    this->negotiationAddress = pkt->getAddress();
-                    this->app_protocol->startSendingUnicast(response, pkt->getAddress(), 0.1, 20);
-                    delete response;
+                        response->setCoordinate(this->mobility->getPositionAt(simTime()).x);
+                        this->negotiationAddress = pkt->getAddress();
+                        this->app_protocol->startSendingUnicast(response, pkt->getAddress(), 0.1, 20);
+                        delete response;
+                    }
+                } else {
+                    this->events[pkt->getAddress()] = std::make_tuple(counts, msg);
+                    scheduleAfter(5, msg);
                 }
                 break;
             }
@@ -83,6 +105,7 @@ namespace plexe::vncd {
                             response->setAccepted(false);
                             this->app_protocol->startSendingUnicast(response, data->getSenderAddress(), 0.1, 4);
                         }
+                        delete response;
                         break;
                     }
                     case PLATOON_CREATE_ANSWER: {

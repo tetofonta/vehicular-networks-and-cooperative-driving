@@ -7,6 +7,7 @@
 
 #include <plexe/apps/BaseApp.h>
 #include <PlatoonSearchCAM_m.h>
+#include <InternalListenTimeout_m.h>
 #include "Protocol.h"
 
 typedef enum{
@@ -24,6 +25,8 @@ namespace plexe::vncd {
 //        int leaderExtraction = -1;
 
         bool isPlatooningCompatible(PlatoonSearchCAM * pkt);
+
+        std::map<long, std::tuple<int, InternalListenTimeout *>> events;
 
     public:
         MyPlatooningApp() = default;

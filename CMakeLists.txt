@@ -29,5 +29,6 @@ generate_opp_message(msg/PlatoonSearchCAM.msg TARGET libvncd)
 generate_opp_message(msg/PlatoonUnicast.msg TARGET libvncd)
 generate_opp_message(msg/PlatoonCreateRequest.msg TARGET libvncd)
 generate_opp_message(msg/PlatoonCreateAnswer.msg TARGET libvncd)
+generate_opp_message(msg/InternalListenTimeout.msg TARGET libvncd)
 
 add_opp_run(vncd DEPENDENCY libvncd WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
