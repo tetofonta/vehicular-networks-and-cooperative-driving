@@ -18,10 +18,10 @@ namespace plexe::vncd {
     class MyPlatooningApp : public BaseApp {
     private:
         PlatooningProtocol * app_protocol = nullptr;
-        bool can_be_leader;
+//        bool can_be_leader;
         long negotiationAddress = -1;
         bool isLeader = false;
-        int leaderExtraction = -1;
+//        int leaderExtraction = -1;
 
         bool isPlatooningCompatible(PlatoonSearchCAM * pkt);
 

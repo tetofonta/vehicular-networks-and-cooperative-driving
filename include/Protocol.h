@@ -17,14 +17,14 @@ namespace plexe::vncd {
 
         cMessage * platoonFormationAdvertisement = nullptr;
 
-        bool can_be_leader;
+//        bool can_be_leader;
 
         cMessage * platoonUnicast = nullptr;
         PlatoonUnicast * currentSendingPacket = nullptr;
         double currentSendingDelay;
         int currentSendingRetries = -1;
 
-        void sendPlatoonAdvertisementBeacon(bool can_be_leader);
+        void sendPlatoonAdvertisementBeacon();
 
         void sendPacket(cPacket * pkt);
 
@@ -38,7 +38,7 @@ namespace plexe::vncd {
 
         void initialize(int stage) override;
 
-        void startPlatoonFormationAdvertisement(bool can_be_leader);
+        void startPlatoonFormationAdvertisement();
         void stopPlatoonFormationAdvertisement();
 
         void startSendingUnicast(PlatoonUnicast * packet, long address, double delay, int retries);

@@ -54,7 +54,7 @@ namespace plexe::vncd {
             sendPlatooningMessage(-1);
             scheduleAt(simTime() + beaconingInterval, sendBeacon);
         } else if (msg == this->platoonFormationAdvertisement){
-            this->sendPlatoonAdvertisementBeacon(this->can_be_leader);
+            this->sendPlatoonAdvertisementBeacon();
             scheduleAfter(1, this->platoonFormationAdvertisement);
         } else if (msg == this->platoonUnicast){
 
@@ -72,9 +72,9 @@ namespace plexe::vncd {
         }
     }
 
-    void PlatooningProtocol::startPlatoonFormationAdvertisement(bool can_be_leader) {
+    void PlatooningProtocol::startPlatoonFormationAdvertisement() {
         Enter_Method_Silent();
-        this->can_be_leader = can_be_leader;
+//        this->can_be_leader = can_be_leader;
         this->platoonFormationAdvertisement = new cMessage("sendAdvertisement");
         scheduleAfter(uniform(0.001, 1), this->platoonFormationAdvertisement);
     }
@@ -96,11 +96,11 @@ namespace plexe::vncd {
         this->sendTo(frame, PlexeRadioInterfaces::ALL);
     }
 
-    void PlatooningProtocol::sendPlatoonAdvertisementBeacon(bool can_be_leader) {
+    void PlatooningProtocol::sendPlatoonAdvertisementBeacon() {
         auto msg = new PlatoonSearchCAM("MSG_ORGY_SEARCH");
         msg->setPlatooning_speed_max(this->mobility->getSpeed() * 1.05);
         msg->setPlatooning_speed_min(this->mobility->getSpeed() * 0.95);
-        msg->setCan_be_leader(can_be_leader);
+//        msg->setCan_be_leader(can_be_leader);
         msg->setKind(0x1234);
         msg->setLane(this->mobility->getVehicleCommandInterface()->getLaneIndex());
         msg->setAddress(this->mobility->getId());
