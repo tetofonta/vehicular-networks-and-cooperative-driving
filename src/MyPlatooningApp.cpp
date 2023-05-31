@@ -57,6 +57,7 @@ namespace plexe::vncd {
         switch (enc->getKind()) {
             case 0x1234: {
                 auto pkt = check_and_cast<PlatoonSearchCAM *>(frame->decapsulate());
+                if(!this->isPlatooningCompatible(pkt)) break;
 
                 int counts = 1;
                 auto msg = new InternalListenTimeout();
@@ -68,7 +69,7 @@ namespace plexe::vncd {
 
                 if(counts >= 3){
                     this->events.erase(pkt->getAddress());
-                    if (this->isPlatooningCompatible(pkt) && this->negotiationAddress == -1) { //todo
+                    if (this->negotiationAddress == -1) {
                         this->app_protocol->stopPlatoonFormationAdvertisement();
                         auto response = new PlatoonCreateRequest();
                         response->setType(PLATOON_CREATE_REQUEST);
