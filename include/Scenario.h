@@ -21,27 +21,18 @@
 #ifndef SIMPLESCENARIO_H_
 #define SIMPLESCENARIO_H_
 
+#include <plexe/scenarios/ManeuverScenario.h>
 #include "plexe/scenarios/BaseScenario.h"
 #include "plexe/apps/BaseApp.h"
 
 namespace plexe::vncd {
 
-class Scenario : public BaseScenario {
-public:
-    virtual void initialize(int stage);
+    class Scenario : public ManeuverScenario {
 
-protected:
-    // leader average speed
-    double leaderSpeed;
-    // application layer, used to stop the simulation
-    BaseApp* appl;
+    };
 
-public:
-    Scenario()
-        : leaderSpeed(0)
-        , appl(nullptr){};
-};
-
+    Define_Module(Scenario);
 } // namespace plexe
+
 
 #endif

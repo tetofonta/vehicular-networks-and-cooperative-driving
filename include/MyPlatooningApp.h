@@ -9,6 +9,7 @@
 #include <PlatoonSearchCAM_m.h>
 #include <InternalListenTimeout_m.h>
 #include <plexe/maneuver/JoinManeuver.h>
+#include <plexe/apps/GeneralPlatooningApp.h>
 #include "Protocol.h"
 
 typedef enum{
@@ -18,19 +19,13 @@ typedef enum{
 
 
 namespace plexe::vncd {
-    class MyPlatooningApp : public BaseApp {
+    class MyPlatooningApp : public GeneralPlatooningApp {
     private:
         PlatooningProtocol * app_protocol = nullptr;
-//        bool can_be_leader;
         long negotiationAddress = -1;
         bool isLeader = false;
-//        int leaderExtraction = -1;
-
-
         bool isPlatooningCompatible(PlatoonSearchCAM * pkt);
-
         std::map<long, std::tuple<int, InternalListenTimeout *>> events;
-
     public:
         MyPlatooningApp() = default;
 
@@ -39,6 +34,7 @@ namespace plexe::vncd {
         void handleLowerMsg(cMessage* msg) override;
         virtual void initialize(int stage) override;
 
+        void onPlatoonBeacon(const PlatooningBeacon *pb) override;
     };
 
     Define_Module(MyPlatooningApp)

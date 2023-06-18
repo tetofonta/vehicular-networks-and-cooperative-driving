@@ -10,6 +10,7 @@
 #include "plexe/messages/PlexeInterfaceControlInfo_m.h"
 #include "veins/base/utils/FindModule.h"
 #include "plexe/scenarios/ManeuverScenario.h"
+#include "MergeManeuver.h"
 #include <PlatoonCreateRequest_m.h>
 #include <PlatoonCreateAnswer_m.h>
 #include <PlatoonSearchCAM_m.h>
@@ -23,17 +24,22 @@ namespace plexe::vncd {
             case 0:
                 break;
             case 1:
+                protocol->registerApplication(MANEUVER_TYPE, gate("lowerLayerIn"), gate("lowerLayerOut"),
+                                                 gate("lowerControlIn"), gate("lowerControlOut"));
                 protocol->registerApplication(0x1234, gate("lowerLayerIn"), gate("lowerLayerOut"),
                                               gate("lowerControlIn"), gate("lowerControlOut"));
                 protocol->registerApplication(0x5678, gate("lowerLayerIn"), gate("lowerLayerOut"),
                                               gate("lowerControlIn"), gate("lowerControlOut"));
 
                 findHost()->subscribe(Mac1609_4::sigRetriesExceeded, this);
-//                this->maneuver = new JoinAtBack(reinterpret_cast<GeneralPlatooningApp *>(this));
 
                 this->app_protocol = (PlatooningProtocol *) this->protocol;
-//                this->can_be_leader = uniform(0, 1) > 0.5;
                 this->app_protocol->startPlatoonFormationAdvertisement();
+                this->scenario = FindModule<BaseScenario *>::findSubModule(omnetpp::cModule::getParentModule());
+
+                this->mergeManeuver = new MergeManeuver(this);
+                this->joinManeuver = new JoinAtBack(this);
+
                 break;
             default:
                 break;
@@ -42,7 +48,9 @@ namespace plexe::vncd {
 
 
     void MyPlatooningApp::handleSelfMsg(omnetpp::cMessage *p_msg) {
-        BaseApp::handleSelfMsg(p_msg);
+        if(this->mergeManeuver) this->mergeManeuver->handleSelfMsg(p_msg);
+        if(this->joinManeuver) this->joinManeuver->handleSelfMsg(p_msg);
+        GeneralPlatooningApp::handleSelfMsg(p_msg);
 
         auto internalTimeout = dynamic_cast<InternalListenTimeout *>(p_msg);
         if(internalTimeout != NULL){
@@ -51,6 +59,8 @@ namespace plexe::vncd {
         }
 
         auto msg = std::make_unique<cMessage>(*p_msg);
+
+
     }
 
     void MyPlatooningApp::handleLowerMsg(omnetpp::cMessage *msg) {
@@ -61,7 +71,9 @@ namespace plexe::vncd {
         switch (enc->getKind()) {
             case 0x1234: {
                 auto pkt = check_and_cast<PlatoonSearchCAM *>(frame->decapsulate());
+                EV << "PLATOON SEARCH CAM RECEIVED: SPEEDS: " << this->mobility->getSpeed() << " " << pkt->getPlatooning_speed_min() << " " << pkt->getPlatooning_speed_max() << endl;
                 if(!this->isPlatooningCompatible(pkt)) break;
+                EV << "PLATOON IS COMPATIBLE" << endl;
 
                 int counts = 1;
                 auto msg = new InternalListenTimeout();
@@ -69,11 +81,14 @@ namespace plexe::vncd {
                 if(this->events.contains(pkt->getAddress())){
                     cancelAndDelete( std::get<1>(this->events[pkt->getAddress()]));
                     counts = std::get<0>(this->events[pkt->getAddress()]) + 1;
+                    EV << "HEARD MESSAGE " << counts << " TIMES" << endl;
                 }
 
                 if(counts >= 3){
+                    EV << "HEARD MESSAGE TOO MANY TIMES" << endl;
                     this->events.erase(pkt->getAddress());
                     if (this->negotiationAddress == -1) {
+                        EV << "STARTING NEGOTIATION" << endl;
                         this->app_protocol->stopPlatoonFormationAdvertisement();
                         auto response = new PlatoonCreateRequest();
                         response->setType(PLATOON_CREATE_REQUEST);
@@ -87,6 +102,7 @@ namespace plexe::vncd {
 
                         this->negotiationAddress = pkt->getAddress();
                         this->app_protocol->startSendingUnicast(response, pkt->getAddress(), 0.1, 20);
+                        EV << "REQ SENT" << endl;
                         delete response;
                     }
                 } else {
@@ -96,6 +112,7 @@ namespace plexe::vncd {
                 break;
             }
             case 0x5678: {
+                if(isInManeuver()) break;
                 auto pkt = check_and_cast<PlatoonUnicast *>(frame->decapsulate());
                 if(pkt->getDestinationAddress() != this->mobility->getId()) break;
                 switch (pkt->getType()) {
@@ -121,12 +138,15 @@ namespace plexe::vncd {
                                 this->traciVehicle->setColor(TraCIColor(255, 255, 0, 255));
                                 this->traciVehicle->setMaxSpeed(data->getPlatooning_speed_min());
                                 this->plexeTraciVehicle->setActiveController(DRIVER);
+                                this->setPlatoonRole(PlatoonRole::LEADER);
                             } else {
                                 response->setPlatoon_id(-1);
                                 response->setLeader_id(-1);
                                 this->traciVehicle->setMaxSpeed(data->getPlatooning_speed_max());
                                 this->traciVehicle->setColor(TraCIColor(255, 0, 255, 255));
-                                //join maneuver
+                                this->setPlatoonRole(PlatoonRole::LEADER);
+                                this->startMergeManeuver(data->getPlatoon_id(), data->getLeader_id(), -1);
+                                EV << this->mobility->getId() << " STARTED MANEUVER" << endl;
                             }
 
                             this->app_protocol->startSendingUnicast(response, data->getSenderAddress(), 0.1, 4);
@@ -148,23 +168,14 @@ namespace plexe::vncd {
                             if(this->isLeader){
                                 this->traciVehicle->setColor(TraCIColor(255, 255, 0, 255));
                                 this->traciVehicle->setMaxSpeed(data->getPlatooning_speed_min());
-                                this->plexeTraciVehicle->setActiveController(DRIVER);
+                                this->setPlatoonRole(PlatoonRole::LEADER);
                             } else {
                                 this->traciVehicle->setMaxSpeed(data->getPlatooning_speed_max());
                                 this->traciVehicle->setColor(TraCIColor(255, 0, 255, 255));
-
-                                //join maneuver
+                                this->setPlatoonRole(PlatoonRole::LEADER);
+                                this->startMergeManeuver(data->getPlatoon_id() != -1 ? data->getPlatoon_id() : this->positionHelper->getPlatoonId(), data->getLeader_id() != -1 ? data->getLeader_id() : this->positionHelper->getLeaderId(), -1);
+                                EV << this->mobility->getId() << " STARTED MANEUVER" << endl;
                             }
-
-                            //WE ARE GOOD TO GO!
-
-                            //leader this->isLeader
-                            //speed: min(max_speed(a), max_speed(b))
-                            //lane: min(lane(a), lane(b))
-
-                            //leader send platoon_join_allowed
-                            //follower -> join platoon maneuver
-
                         } else {
                             this->app_protocol->stopSendingUnicast();
                             this->negotiationAddress = -1;
@@ -175,14 +186,21 @@ namespace plexe::vncd {
                 break;
             }
             default:
-                BaseApp::handleLowerMsg(frame.release());
+                GeneralPlatooningApp::handleLowerMsg(frame.release());
         }
     }
 
     bool MyPlatooningApp::isPlatooningCompatible(PlatoonSearchCAM *pkt) {
         if (this->mobility->getSpeed() < pkt->getPlatooning_speed_min()) return false;
         if (this->mobility->getSpeed() > pkt->getPlatooning_speed_max()) return false;
-//        if (!(this->can_be_leader || pkt->getCan_be_leader())) return false;
         return true;
     }
+
+    void MyPlatooningApp::onPlatoonBeacon(const PlatooningBeacon * pb){
+//        GeneralPlatooningApp::onPlatoonBeacon(pb); //bug because join maneuver e mergeManeuver possono non essere definiti.
+        if(this->mergeManeuver) this->mergeManeuver->onPlatoonBeacon(pb);
+        if(this->joinManeuver) this->joinManeuver->onPlatoonBeacon(pb);
+        BaseApp::onPlatoonBeacon(pb);
+    }
+
 }

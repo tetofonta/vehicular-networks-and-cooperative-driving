@@ -20,7 +20,7 @@ set(SOURCES
         include/TrafficManager.h
         src/PlatooningProtocol.cpp
         include/Protocol.h
-        )
+        src/MergeManeuver.cpp include/MergeManeuver.h)
 
 add_library(libvncd SHARED ${SOURCES})
 set_target_properties(libvncd PROPERTIES NED_FOLDERS networks:${VEINS_NED_DIR}:${PLEXE_NED_DIR})

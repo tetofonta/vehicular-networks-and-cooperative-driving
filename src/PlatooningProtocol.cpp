@@ -34,9 +34,9 @@ namespace plexe::vncd {
             traciVehicle = mobility->getVehicleCommandInterface();
 
 
-            if (Veins11pRadioDriver* driver = FindModule<Veins11pRadioDriver*>::findSubModule(getParentModule())) {
-                driver->registerNode(getParentModule()->getIndex() + 1e6);
-            }
+//            if (Veins11pRadioDriver* driver = FindModule<Veins11pRadioDriver*>::findSubModule(getParentModule())) {
+//                driver->registerNode(getParentModule()->getIndex() + 1e6);
+//            }
 
             // random start time
             SimTime beginTime = SimTime(uniform(0.001, beaconingInterval));
@@ -98,8 +98,8 @@ namespace plexe::vncd {
 
     void PlatooningProtocol::sendPlatoonAdvertisementBeacon() {
         auto msg = new PlatoonSearchCAM("MSG_ORGY_SEARCH");
-        msg->setPlatooning_speed_max(this->mobility->getSpeed() * 1.05);
-        msg->setPlatooning_speed_min(this->mobility->getSpeed() * 0.95);
+        msg->setPlatooning_speed_max(this->mobility->getSpeed() * 1.1);
+        msg->setPlatooning_speed_min(this->mobility->getSpeed() * 0.9);
         msg->setKind(0x1234);
         msg->setLane(this->mobility->getVehicleCommandInterface()->getLaneIndex());
         msg->setAddress(this->mobility->getId());
