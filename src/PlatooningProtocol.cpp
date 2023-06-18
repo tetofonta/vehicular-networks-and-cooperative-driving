@@ -100,11 +100,11 @@ namespace plexe::vncd {
         auto msg = new PlatoonSearchCAM("MSG_ORGY_SEARCH");
         msg->setPlatooning_speed_max(this->mobility->getSpeed() * 1.05);
         msg->setPlatooning_speed_min(this->mobility->getSpeed() * 0.95);
-//        msg->setCan_be_leader(can_be_leader);
         msg->setKind(0x1234);
         msg->setLane(this->mobility->getVehicleCommandInterface()->getLaneIndex());
         msg->setAddress(this->mobility->getId());
-
+        msg->setPlatoon_id(this->positionHelper->getPlatoonId());
+        msg->setLeader_id(this->positionHelper->getLeaderId());
         this->sendPacket(msg);
     }
 

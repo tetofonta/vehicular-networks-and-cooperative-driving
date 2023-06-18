@@ -27,6 +27,10 @@ namespace plexe::vncd {
                                               gate("lowerControlIn"), gate("lowerControlOut"));
                 protocol->registerApplication(0x5678, gate("lowerLayerIn"), gate("lowerLayerOut"),
                                               gate("lowerControlIn"), gate("lowerControlOut"));
+
+                findHost()->subscribe(Mac1609_4::sigRetriesExceeded, this);
+//                this->maneuver = new JoinAtBack(reinterpret_cast<GeneralPlatooningApp *>(this));
+
                 this->app_protocol = (PlatooningProtocol *) this->protocol;
 //                this->can_be_leader = uniform(0, 1) > 0.5;
                 this->app_protocol->startPlatoonFormationAdvertisement();
@@ -73,8 +77,14 @@ namespace plexe::vncd {
                         this->app_protocol->stopPlatoonFormationAdvertisement();
                         auto response = new PlatoonCreateRequest();
                         response->setType(PLATOON_CREATE_REQUEST);
-//                    response->setLeaderExtraction(this->leaderExtraction);
                         response->setCoordinate(this->mobility->getPositionAt(simTime()).x);
+                        response->setPlatooning_speed_min(pkt->getPlatooning_speed_min());
+                        response->setPlatooning_speed_max(pkt->getPlatooning_speed_max());
+                        response->setLane(pkt->getLane());
+
+                        response->setPlatoon_id(this->positionHelper->getPlatoonId());
+                        response->setLeader_id(this->positionHelper->getLeaderId());
+
                         this->negotiationAddress = pkt->getAddress();
                         this->app_protocol->startSendingUnicast(response, pkt->getAddress(), 0.1, 20);
                         delete response;
@@ -87,6 +97,7 @@ namespace plexe::vncd {
             }
             case 0x5678: {
                 auto pkt = check_and_cast<PlatoonUnicast *>(frame->decapsulate());
+                if(pkt->getDestinationAddress() != this->mobility->getId()) break;
                 switch (pkt->getType()) {
                     case PLATOON_CREATE_REQUEST: {
                         auto data = check_and_cast<PlatoonCreateRequest *>(pkt);
@@ -98,8 +109,26 @@ namespace plexe::vncd {
                             response->setType(PLATOON_CREATE_ANSWER);
                             response->setAccepted(true);
                             response->setCoordinate(this->mobility->getPositionAt(simTime()).x);
+                            response->setPlatooning_speed_min(data->getPlatooning_speed_min());
+                            response->setPlatooning_speed_max(data->getPlatooning_speed_max());
+                            response->setLane(data->getLane());
                             this->isLeader = this->mobility->getPositionAt(simTime()).x >
                                              data->getCoordinate(); //todo use coordinates and heading
+
+                            if(this->isLeader){
+                                response->setPlatoon_id(this->positionHelper->getPlatoonId());
+                                response->setLeader_id(this->positionHelper->getLeaderId());
+                                this->traciVehicle->setColor(TraCIColor(255, 255, 0, 255));
+                                this->traciVehicle->setMaxSpeed(data->getPlatooning_speed_min());
+                                this->plexeTraciVehicle->setActiveController(DRIVER);
+                            } else {
+                                response->setPlatoon_id(-1);
+                                response->setLeader_id(-1);
+                                this->traciVehicle->setMaxSpeed(data->getPlatooning_speed_max());
+                                this->traciVehicle->setColor(TraCIColor(255, 0, 255, 255));
+                                //join maneuver
+                            }
+
                             this->app_protocol->startSendingUnicast(response, data->getSenderAddress(), 0.1, 4);
                         } else {
                             response->setType(PLATOON_CREATE_ANSWER);
@@ -116,15 +145,23 @@ namespace plexe::vncd {
                                              data->getCoordinate(); //todo use coordinates and heading
                             this->app_protocol->stopSendingUnicast();
 
+                            if(this->isLeader){
+                                this->traciVehicle->setColor(TraCIColor(255, 255, 0, 255));
+                                this->traciVehicle->setMaxSpeed(data->getPlatooning_speed_min());
+                                this->plexeTraciVehicle->setActiveController(DRIVER);
+                            } else {
+                                this->traciVehicle->setMaxSpeed(data->getPlatooning_speed_max());
+                                this->traciVehicle->setColor(TraCIColor(255, 0, 255, 255));
+
+                                //join maneuver
+                            }
+
                             //WE ARE GOOD TO GO!
 
                             //leader this->isLeader
                             //speed: min(max_speed(a), max_speed(b))
                             //lane: min(lane(a), lane(b))
 
-                            //se sono il leader e sono dietro -> overtake maneuver -> go to negotiated lane (rightmost)
-                            //se non sono il leader -> sta fermo e non rompere
-                            //se sono il leader e sono davanti -> sta fermo e non rompere
                             //leader send platoon_join_allowed
                             //follower -> join platoon maneuver
 
@@ -148,6 +185,4 @@ namespace plexe::vncd {
 //        if (!(this->can_be_leader || pkt->getCan_be_leader())) return false;
         return true;
     }
-
-
 }

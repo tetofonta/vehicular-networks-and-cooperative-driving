@@ -8,12 +8,14 @@
 #include <plexe/apps/BaseApp.h>
 #include <PlatoonSearchCAM_m.h>
 #include <InternalListenTimeout_m.h>
+#include <plexe/maneuver/JoinManeuver.h>
 #include "Protocol.h"
 
 typedef enum{
     PLATOON_CREATE_REQUEST = 0,
     PLATOON_CREATE_ANSWER
 } unicast_type_t;
+
 
 namespace plexe::vncd {
     class MyPlatooningApp : public BaseApp {
@@ -23,6 +25,7 @@ namespace plexe::vncd {
         long negotiationAddress = -1;
         bool isLeader = false;
 //        int leaderExtraction = -1;
+
 
         bool isPlatooningCompatible(PlatoonSearchCAM * pkt);
 
