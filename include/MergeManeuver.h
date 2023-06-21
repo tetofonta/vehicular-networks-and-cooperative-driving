@@ -7,8 +7,6 @@
 
 
 #include <plexe/apps/BaseApp.h>
-#include <PlatoonSearchCAM_m.h>
-#include <InternalListenTimeout_m.h>
 #include <plexe/maneuver/JoinManeuver.h>
 #include <plexe/apps/GeneralPlatooningApp.h>
 #include "Protocol.h"

@@ -8,4 +8,6 @@ simple PlatooningProtocol extends BBaseProtocol
         @display("i=block/network2");
         @class(plexe::vncd::PlatooningProtocol);
 
+        double platoonAdvertisementInterval @unit("s");
+        double platooningFormationSpeedRange;
 }

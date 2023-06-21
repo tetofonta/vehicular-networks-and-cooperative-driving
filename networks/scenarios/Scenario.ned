@@ -1,8 +1,8 @@
 package org.car2x.plexe.vncd.scenarios;
 
-import org.car2x.plexe.scenarios.BBaseScenario;
+import org.car2x.plexe.scenarios.ManeuverScenario;
 
-simple Scenario extends BBaseScenario
+simple Scenario extends ManeuverScenario
 {
     parameters:
         @display("i=block/app2");

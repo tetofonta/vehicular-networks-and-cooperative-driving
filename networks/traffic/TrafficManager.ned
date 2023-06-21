@@ -7,11 +7,11 @@ simple TrafficManager extends BTraCIBaseTrafficManager {
     parameters:
         //platoon insertion time
         double insertStartTime @unit("s");
-        volatile double insertDelay;
+        volatile double insertDelay @unit("s");
 
 
         //platoon insertion speed
-        volatile double platoonInsertSpeed;
+        volatile double platoonInsertSpeed @unit("mps");
         //how many vehicles to inject
         int nCars;
         //number of lanes

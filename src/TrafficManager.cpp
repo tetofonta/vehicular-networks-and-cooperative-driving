@@ -1,23 +1,3 @@
-//
-// Copyright (C) 2014-2023 Michele Segata <segata@ccs-labs.org>
-//
-// SPDX-License-Identifier: GPL-2.0-or-later
-//
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-
 #include <TrafficManager.h>
 
 namespace plexe::vncd {
@@ -25,74 +5,62 @@ namespace plexe::vncd {
     Define_Module(TrafficManager);
 
     void TrafficManager::initialize(int stage) {
-
         TraCIBaseTrafficManager::initialize(stage);
+        if (stage > 0) return;
 
-        if (stage == 0) {
+        //stage 0
+        this->nCars = par("nCars");
+        this->nLanes = par("nLanes");
+        this->insertStartTime = SimTime(par("insertStartTime").doubleValue());
+        this->platoonLeaderHeadway = par("platoonLeaderHeadway").doubleValue();
 
-            nCars = par("nCars");
-            nLanes = par("nLanes");
-            insertStartTime = SimTime(par("insertStartTime").doubleValue());
-            platoonLeaderHeadway = par("platoonLeaderHeadway").doubleValue();
+        this->platooningVType = par("platooningVType").stdstringValue();
 
-            platoonInsertDistance = par("platoonInsertDistance").doubleValue();
-            platoonInsertHeadway = par("platoonInsertHeadway").doubleValue();
-            platoonAdditionalDistance = par("platoonAdditionalDistance").doubleValue();
-            platooningVType = par("platooningVType").stdstringValue();
-
-            insertPlatoonMessage = new cMessage("");
-            scheduleAt(insertStartTime, insertPlatoonMessage);
-        }
-    }
-
-    void TrafficManager::scenarioLoaded() {
-        automated.id = findVehicleTypeIndex(platooningVType);
-        automated.lane = -1;
-        automated.position = 0;
+        this->evt_startInsertion = make_unique<cMessage>();
+        scheduleAt(this->insertStartTime, this->evt_startInsertion.get());
     }
 
     void TrafficManager::handleSelfMsg(cMessage *msg) {
-
         TraCIBaseTrafficManager::handleSelfMsg(msg);
-
-        if (msg == insertPlatoonMessage) {
-            insertCars();
-        }
+        if (this->evt_startInsertion.get() == msg) this->insertCars();
     }
 
+    /**
+     * Inserts a car with random speed configured by omnetpp.ini with its own platoon
+     */
     void TrafficManager::insertCars() {
-
-        automated.position = 5;
-        automated.lane = (int) uniform(0, 2);
-        automated.speed = par("platoonInsertSpeed").doubleValue();
-
-        //define the vehicle information as the leader of a 1 car platoon
-        VehicleInfo vehicleInfo{
-                .controller = ACC,
-                .distance = 1,
-                .headway = platoonLeaderHeadway,
-                .id = insertedCars,
-                .platoonId = insertedCars++,
-                .position = automated.position
+        struct Vehicle cur_vehicle{
+                .id = findVehicleTypeIndex(this->platooningVType),
+                .lane = (int) uniform(0, this->nLanes),
+                .position = 5.0f,
+                .speed = (float) par("platoonInsertSpeed").doubleValue(),
         };
 
-        //Define the platoon information for the current vehicle
+        VehicleInfo vehicleInfo{
+                .controller = ACC, //just not make crashes!
+                .distance = 1,
+                .headway = this->platoonLeaderHeadway,
+                .id = this->insertedCars,
+                .platoonId = this->insertedCars++,
+                .position = (int) cur_vehicle.position
+        };
+
         PlatoonInfo info{
-                .speed = automated.speed,
-                .lane = automated.lane,
+                .speed = cur_vehicle.speed,
+                .lane = cur_vehicle.lane,
         };
 
         positions.addVehicleToPlatoon(vehicleInfo.id, vehicleInfo);
         positions.setPlatoonInformation(vehicleInfo.platoonId, info);
-        this->addVehicleToQueue(0, automated);
+        this->addVehicleToQueue(0, cur_vehicle);
 
-        if(--this->nCars)
-            scheduleAfter(SimTime(par("insertDelay")), insertPlatoonMessage);
+        if (--this->nCars)
+            scheduleAfter(par("insertDelay").doubleValue(), this->evt_startInsertion.get());
     }
 
     TrafficManager::~TrafficManager() {
-        cancelAndDelete(insertPlatoonMessage);
-        insertPlatoonMessage = nullptr;
+        if(this->evt_startInsertion->isScheduled())
+            cancelEvent(this->evt_startInsertion.get());
     }
 
 } // namespace plexe

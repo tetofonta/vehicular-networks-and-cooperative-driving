@@ -1,3 +1,0 @@
-message InternalListenTimeout{
-    long address;
-}

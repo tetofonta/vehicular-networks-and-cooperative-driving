@@ -1,7 +1,8 @@
 #include <Protocol.h>
-#include "PlatoonSearchCAM_m.h"
 
 #include "plexe/protocols/BaseProtocol.h"
+#include <packets/platoonAdvertisementBeacon_m.h>
+#include <format>
 #include "veins/modules/mobility/traci/TraCIColor.h"
 #include "veins/modules/mobility/traci/TraCIScenarioManager.h"
 #include "veins/modules/messages/BaseFrame1609_4_m.h"
@@ -18,124 +19,124 @@ namespace plexe::vncd {
 
     Define_Module(PlatooningProtocol)
 
-    void PlatooningProtocol::initialize(int stage)
-    {
+    void PlatooningProtocol::initialize(int stage) {
         BaseProtocol::initialize(stage);
 
-        if (stage == 0) {
+        if(stage > 0) return;
 
-            // get gates
-            lowerLayerIn = findGate("lowerLayerIn");
-            lowerLayerOut = findGate("lowerLayerOut");
+        this->platoonAdvertiseBeaconInterval = SimTime(par("platoonAdvertisementInterval").doubleValue());
+        this->evt_SendPlatoonAdvertiseBeacon = make_unique<cMessage>();
+        this->platooningFormationSpeedRange = par("platooningFormationSpeedRange").doubleValue();
+    }
 
-            // get traci interface
-            mobility = veins::TraCIMobilityAccess().get(getParentModule());
-            traci = mobility->getCommandInterface();
-            traciVehicle = mobility->getVehicleCommandInterface();
+    void PlatooningProtocol::handleSelfMsg(cMessage *p_msg) {
+        if(this->evt_SendPlatoonAdvertiseBeacon.get() == p_msg){
+            sendPlatoonAdvertisementBeacon();
+            scheduleAfter(this->platoonAdvertiseBeaconInterval, this->evt_SendPlatoonAdvertiseBeacon.get());
+            return;
+        }
 
-
-//            if (Veins11pRadioDriver* driver = FindModule<Veins11pRadioDriver*>::findSubModule(getParentModule())) {
-//                driver->registerNode(getParentModule()->getIndex() + 1e6);
-//            }
-
-            // random start time
-            SimTime beginTime = SimTime(uniform(0.001, beaconingInterval));
-            if (beaconingInterval > 0) scheduleAt(simTime() + beaconingInterval + beginTime, sendBeacon);
-
-
+        if(auto interval = dynamic_cast<PlatoonAdvertisementListenTimeout *>(p_msg)){
+            EV << "Platoon " << interval->getPlatoon() << " no heard for a long time..." << endl;
+            this->events.erase(interval->getPlatoon());
         }
     }
 
-    void PlatooningProtocol::handleSelfMsg(cMessage* msg)
-    {
-        BaseProtocol::handleSelfMsg(msg);
-
-        if (msg == this->sendBeacon) {
-            sendPlatooningMessage(-1);
-            scheduleAt(simTime() + beaconingInterval, sendBeacon);
-        } else if (msg == this->platoonFormationAdvertisement){
-            this->sendPlatoonAdvertisementBeacon();
-            scheduleAfter(1, this->platoonFormationAdvertisement);
-        } else if (msg == this->platoonUnicast){
-
-            auto pkt = this->currentSendingPacket->dup();
-            this->sendPacket(pkt);
-
-            if(this->currentSendingRetries == -1 || this->currentSendingRetries-- > 0) {
-                scheduleAfter(this->currentSendingDelay, this->platoonUnicast);
-            }else {
-//                delete this->platoonUnicast;
-//                delete this->currentSendingPacket;
-//                this->platoonUnicast = nullptr;
-//                this->currentSendingPacket = nullptr;
-            }
-        }
+    unique_ptr<BaseFrame1609_4> PlatooningProtocol::encapsulate(int destinationAddress, cPacket * pkt, int kind){
+        auto wsm = veins::make_unique<BaseFrame1609_4>("", kind);
+        wsm->setRecipientAddress(destinationAddress);
+        wsm->setChannelNumber(static_cast<int>(Channel::cch));
+        wsm->setUserPriority(priority);
+        wsm->encapsulate(pkt);
+        return wsm;
+    }
+    unique_ptr<BaseFrame1609_4> PlatooningProtocol::buildPacket(int destinationAddress, PacketHeader *pkt, int kind) {
+        pkt->setSenderAddress(this->positionHelper->getLeaderId());
+        return this->encapsulate(destinationAddress, pkt, kind);
     }
 
-    void PlatooningProtocol::startPlatoonFormationAdvertisement() {
+    void PlatooningProtocol::sendBroadcast(PacketHeader * pkt, int kind){
         Enter_Method_Silent();
-//        this->can_be_leader = can_be_leader;
-        this->platoonFormationAdvertisement = new cMessage("sendAdvertisement");
-        scheduleAfter(uniform(0.001, 1), this->platoonFormationAdvertisement);
+        this->sendTo(this->buildPacket(-1, pkt, kind)->dup(), PlexeRadioInterfaces::ALL);
     }
-
-    void PlatooningProtocol::stopPlatoonFormationAdvertisement() {
+    void PlatooningProtocol::sendUnicast(PacketHeader * pkt, int kind, int destinationAddress){
         Enter_Method_Silent();
-        if(this->platoonFormationAdvertisement == nullptr) return; //already stopped, do nothing
-        cancelAndDelete(this->platoonFormationAdvertisement);
-        this->platoonFormationAdvertisement = nullptr;
+        auto frame = this->buildPacket(destinationAddress, pkt->dup(), kind);
+        this->sendTo(frame.release(), PlexeRadioInterfaces::VEINS_11P);
     }
 
-    void PlatooningProtocol::sendPacket(omnetpp::cPacket *pkt) {
-        auto frame = new BaseFrame1609_4("", pkt->getKind());
-        frame->setRecipientAddress(LAddress::L2BROADCAST());
-        frame->setUserPriority(priority+1);
-        frame->setChannelNumber(static_cast<int>(Channel::cch));
-
-        frame->encapsulate(pkt);
-        this->sendTo(frame, PlexeRadioInterfaces::ALL);
+    void PlatooningProtocol::startPlatoonAdvertisement(){
+        if(this->evt_SendPlatoonAdvertiseBeacon->isScheduled()) return;
+        scheduleAfter(uniform(0.01, 2*this->platoonAdvertiseBeaconInterval), this->evt_SendPlatoonAdvertiseBeacon.get());
     }
-
+    void PlatooningProtocol::stopPlatoonAdvertisement(){
+        if(!this->evt_SendPlatoonAdvertiseBeacon->isScheduled()) return;
+        cancelEvent(this->evt_SendPlatoonAdvertiseBeacon.get());
+    }
+    unique_ptr<PlatoonAdvertiseBeacon> PlatooningProtocol::createPlatoonAdvertisementBeacon(){
+        auto beacon = make_unique<PlatoonAdvertiseBeacon>(
+                std::format("PlatoonAdvertiseBeacon {}", this->positionHelper->getPlatoonId()).c_str(), BEACON_TYPE);
+        beacon->setLane(this->traciVehicle->getLaneIndex());
+        beacon->setPlatoon_id(this->positionHelper->getPlatoonId());
+        beacon->setPlatoon_speed(this->mobility->getSpeed());
+        return beacon;
+    }
     void PlatooningProtocol::sendPlatoonAdvertisementBeacon() {
-        auto msg = new PlatoonSearchCAM("MSG_ORGY_SEARCH");
-        msg->setPlatooning_speed_max(this->mobility->getSpeed() * 1.1);
-        msg->setPlatooning_speed_min(this->mobility->getSpeed() * 0.9);
-        msg->setKind(0x1234);
-        msg->setLane(this->mobility->getVehicleCommandInterface()->getLaneIndex());
-        msg->setAddress(this->mobility->getId());
-        msg->setPlatoon_id(this->positionHelper->getPlatoonId());
-        msg->setLeader_id(this->positionHelper->getLeaderId());
-        this->sendPacket(msg);
+        this->sendBroadcast(this->createPlatoonAdvertisementBeacon().release(), BEACON_TYPE);
     }
 
-    void PlatooningProtocol::startSendingUnicast(PlatoonUnicast *packet, long address, double delay, int retries) {
-        Enter_Method_Silent();
-        packet->setSenderAddress(this->mobility->getId());
-        packet->setDestinationAddress(address);
-        packet->setKind(0x5678);
+    void PlatooningProtocol::routePlatoonRequests(bool state){
+        this->doRoutePlatoonRequests = state;
+    }
+    bool PlatooningProtocol::isPlatoonCompatible(PlatoonAdvertiseBeacon *pkt){
+        if(pkt->getLane() != this->traciVehicle->getLaneIndex()) return false;
+        if(pkt->getPlatoon_speed() > (this->traciVehicle->getSpeed() * (1 + this->platooningFormationSpeedRange))) return false;
+        if(pkt->getPlatoon_speed() < (this->traciVehicle->getSpeed() * (1 - this->platooningFormationSpeedRange))) return false;
+        return true;
+    }
+    bool PlatooningProtocol::handlePlatoonAdvertisement(PlatoonAdvertiseBeacon *pkt) {
+        if(!this->doRoutePlatoonRequests) return false;
+        if(!this->isPlatoonCompatible(pkt)) return false;
 
-        this->currentSendingDelay = delay;
-        this->currentSendingPacket = packet->dup();
-        this->currentSendingRetries = retries;
+        if(!this->events.contains(pkt->getPlatoon_id())){
+            EV << "Heard message " << pkt << " once" << endl;
+            auto interval = make_unique<PlatoonAdvertisementListenTimeout>(std::format("Timeout platoon {}", pkt->getPlatoon_id()).c_str());
+            interval->setPlatoon(pkt->getPlatoon_id());
+            interval->setCount(1);
+            scheduleAfter(5, interval.get());
+            this->events[pkt->getPlatoon_id()] = std::move(interval);
+            return false;
+        }
 
-        this->platoonUnicast = new cMessage("Send unicast");
-        scheduleAfter(uniform(0.001, 2*delay), this->platoonUnicast);
+        auto interval = std::move(this->events[pkt->getPlatoon_id()]);
+        cancelEvent(interval.get());
+        interval->setCount(interval->getCount() + 1);
+        EV << "Heard message " << pkt << " " << (int) interval->getCount() << " times" << endl;
+
+        if(interval->getCount() >= 3){
+            this->events.erase(pkt->getPlatoon_id());
+            EV << "routing" << pkt  << endl;
+            return true;
+        }
+
+        scheduleAfter(5, interval.get());
+        this->events[pkt->getPlatoon_id()] = std::move(interval);
+        return false;
     }
 
-    void PlatooningProtocol::stopSendingUnicast() {
-        Enter_Method_Silent();
-        if(this->platoonUnicast == nullptr) return; //already stopped, do nothing
-        cancelAndDelete(this->platoonUnicast);
-        this->platoonUnicast = nullptr;
-        this->currentSendingPacket = nullptr;
-        this->currentSendingRetries = 0;
+    PlatooningProtocol::PlatooningProtocol() {}
+    PlatooningProtocol::~PlatooningProtocol() {}
+
+    void PlatooningProtocol::handleLowerMsg(cMessage * p_msg){
+        auto frame = unique_ptr<BaseFrame1609_4>(check_and_cast<BaseFrame1609_4*>(p_msg));
+        cPacket * enc = frame->getEncapsulatedPacket();
+        ASSERT2(enc, "received a BaseFrame1609_4 with nothing inside");
+
+        if(auto platoon_beacon = dynamic_cast<PlatoonAdvertiseBeacon*>(enc))
+            if (!handlePlatoonAdvertisement(platoon_beacon)) return;
+
+
+        BaseProtocol::handleLowerMsg(frame.release());
     }
 
-    PlatooningProtocol::PlatooningProtocol()
-    {
-    }
-
-    PlatooningProtocol::~PlatooningProtocol()
-    {
-    }
 }

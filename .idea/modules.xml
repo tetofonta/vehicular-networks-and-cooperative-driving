@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/VNCD-PROJECT.iml" filepath="$PROJECT_DIR$/.idea/VNCD-PROJECT.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/vehicular-networks-and-cooperative-driving.iml" filepath="$PROJECT_DIR$/.idea/vehicular-networks-and-cooperative-driving.iml" />
     </modules>
   </component>
 </project>
