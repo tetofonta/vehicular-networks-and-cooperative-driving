@@ -10,4 +10,5 @@ simple PlatooningProtocol extends BBaseProtocol
 
         double platoonAdvertisementInterval @unit("s");
         double platooningFormationSpeedRange;
+        double maxPlatoonSize;
 }

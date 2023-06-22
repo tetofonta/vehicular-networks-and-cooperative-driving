@@ -27,7 +27,7 @@ namespace plexe::vncd {
         this->evt_SendPlatoonAdvertiseBeacon = make_unique<cMessage>("Send Advertise Beacon");
         this->evt_SendPlatooonBeacon = make_unique<cMessage>("Send Platoon Beacon");
         this->platooningFormationSpeedRange = par("platooningFormationSpeedRange").doubleValue();
-
+        this->maxPlatoonSize = par("maxPlatoonSize").intValue();
         scheduleAfter(uniform(0.001, this->beaconingInterval), evt_SendPlatooonBeacon.get());
     }
 
@@ -90,6 +90,7 @@ namespace plexe::vncd {
         beacon->setLane(this->traciVehicle->getLaneIndex());
         beacon->setPlatoon_id(this->positionHelper->getPlatoonId());
         beacon->setPlatoon_speed(this->mobility->getSpeed());
+        beacon->setPlatoon_size(this->positionHelper->getPlatoonSize());
         return beacon;
     }
     void PlatooningProtocol::sendPlatoonAdvertisementBeacon() {
@@ -101,8 +102,12 @@ namespace plexe::vncd {
     }
     bool PlatooningProtocol::isPlatoonCompatible(PlatoonAdvertiseBeacon *pkt){
         if(pkt->getLane() != this->traciVehicle->getLaneIndex()) return false;
-        if(pkt->getPlatoon_speed() > (this->traciVehicle->getSpeed() * (1 + this->platooningFormationSpeedRange))) return false;
-        if(pkt->getPlatoon_speed() < (this->traciVehicle->getSpeed() * (1 - this->platooningFormationSpeedRange))) return false;
+
+        auto max_speed_delta = std::min(pkt->getPlatoon_speed(), this->traciVehicle->getSpeed()) * this->platooningFormationSpeedRange;
+        if(std::abs(pkt->getPlatoon_speed() - this->traciVehicle->getSpeed()) < max_speed_delta) return false;
+
+        if(this->maxPlatoonSize < pkt->getPlatoon_size() + this->positionHelper->getPlatoonSize()) return false;
+
         return true;
     }
     bool PlatooningProtocol::handlePlatoonAdvertisement(PlatoonAdvertiseBeacon *pkt) {

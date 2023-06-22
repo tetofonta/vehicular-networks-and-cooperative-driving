@@ -30,6 +30,7 @@ namespace plexe::vncd {
 
         bool doRoutePlatoonRequests = false;
         double platooningFormationSpeedRange;
+        uint8_t maxPlatoonSize;
 
     protected:
         void handleSelfMsg(cMessage *msg) override;

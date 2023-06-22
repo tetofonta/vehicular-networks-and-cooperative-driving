@@ -5,8 +5,8 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/omnetpp ${PROJECT_SOURCE_DIR}/cmake/veins ${PROJECT_SOURCE_DIR}/cmake/plexe)
 
 set(OMNETPP_ROOT /opt/omnetpp)
-#set(VEINS_ROOT ${PROJECT_SOURCE_DIR}/../veins)
-#set(PLEXE_ROOT ${PROJECT_SOURCE_DIR}/../plexe)
+set(VEINS_ROOT ${PROJECT_SOURCE_DIR}/../veins)
+set(PLEXE_ROOT ${PROJECT_SOURCE_DIR}/../plexe)
 
 find_package(OmnetPP 6.0 REQUIRED)
 find_package(Veins REQUIRED)
