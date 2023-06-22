@@ -16,8 +16,13 @@ using namespace veins;
 namespace plexe::vncd {
 
     class MergeManeuver : public MergeAtBack {
+    private:
+        cMessage * evt_ManeuverEnd;
+
     public:
-        explicit MergeManeuver(GeneralPlatooningApp * app): MergeAtBack(app) {};
+        explicit MergeManeuver(GeneralPlatooningApp * app, cMessage * evt_maneuver): MergeAtBack(app){
+            this->evt_ManeuverEnd = evt_maneuver;
+        }
 
         void handleJoinFormationAck(const JoinFormationAck* msg) override;
     };

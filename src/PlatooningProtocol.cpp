@@ -2,7 +2,6 @@
 
 #include "plexe/protocols/BaseProtocol.h"
 #include <packets/platoonAdvertisementBeacon_m.h>
-#include <format>
 #include "veins/modules/mobility/traci/TraCIColor.h"
 #include "veins/modules/mobility/traci/TraCIScenarioManager.h"
 #include "veins/modules/messages/BaseFrame1609_4_m.h"
@@ -25,8 +24,8 @@ namespace plexe::vncd {
         if(stage > 0) return;
 
         this->platoonAdvertiseBeaconInterval = SimTime(par("platoonAdvertisementInterval").doubleValue());
-        this->evt_SendPlatoonAdvertiseBeacon = make_unique<cMessage>();
-        this->evt_SendPlatooonBeacon = make_unique<cMessage>();
+        this->evt_SendPlatoonAdvertiseBeacon = make_unique<cMessage>("Send Advertise Beacon");
+        this->evt_SendPlatooonBeacon = make_unique<cMessage>("Send Platoon Beacon");
         this->platooningFormationSpeedRange = par("platooningFormationSpeedRange").doubleValue();
 
         scheduleAfter(uniform(0.001, this->beaconingInterval), evt_SendPlatooonBeacon.get());
@@ -77,16 +76,17 @@ namespace plexe::vncd {
     }
 
     void PlatooningProtocol::startPlatoonAdvertisement(){
+        Enter_Method_Silent();
         if(this->evt_SendPlatoonAdvertiseBeacon->isScheduled()) return;
         scheduleAfter(uniform(0.01, 2*this->platoonAdvertiseBeaconInterval), this->evt_SendPlatoonAdvertiseBeacon.get());
     }
     void PlatooningProtocol::stopPlatoonAdvertisement(){
+        Enter_Method_Silent();
         if(!this->evt_SendPlatoonAdvertiseBeacon->isScheduled()) return;
         cancelEvent(this->evt_SendPlatoonAdvertiseBeacon.get());
     }
     unique_ptr<PlatoonAdvertiseBeacon> PlatooningProtocol::createPlatoonAdvertisementBeacon(){
-        auto beacon = make_unique<PlatoonAdvertiseBeacon>(
-                std::format("PlatoonAdvertiseBeacon {}", this->positionHelper->getPlatoonId()).c_str(), BEACON_TYPE);
+        auto beacon = make_unique<PlatoonAdvertiseBeacon>( "PlatoonAdvertiseBeacon", PLATOON_NEGOTIATION_TYPE);
         beacon->setLane(this->traciVehicle->getLaneIndex());
         beacon->setPlatoon_id(this->positionHelper->getPlatoonId());
         beacon->setPlatoon_speed(this->mobility->getSpeed());
@@ -114,7 +114,7 @@ namespace plexe::vncd {
 
         if(!this->events.contains(pkt->getPlatoon_id())){
             EV << "Heard message " << pkt << " once" << endl;
-            auto interval = make_unique<PlatoonAdvertisementListenTimeout>(std::format("Timeout platoon {}", pkt->getPlatoon_id()).c_str());
+            auto interval = make_unique<PlatoonAdvertisementListenTimeout>("Timeout platoon");
             interval->setPlatoon(pkt->getPlatoon_id());
             interval->setCount(1);
             scheduleAfter(5, interval.get());
@@ -148,7 +148,6 @@ namespace plexe::vncd {
 
         if(auto platoon_beacon = dynamic_cast<PlatoonAdvertiseBeacon*>(enc))
             if (!handlePlatoonAdvertisement(platoon_beacon)) return;
-
 
         BaseProtocol::handleLowerMsg(frame.release());
     }

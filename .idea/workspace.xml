@@ -13,7 +13,6 @@
     <generated>
       <config projectName="VNCD_PROJECT" targetName="run_vncd" />
       <config projectName="VNCD_PROJECT" targetName="libvncd" />
-      <config projectName="VNCD_PROJECT" targetName="debug_vncd" />
     </generated>
   </component>
   <component name="CMakeSettings">
@@ -23,17 +22,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a4064aea-407d-47ba-9ed1-009f9c225abb" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/include/ApplicationAdapter.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ApplicationAdapter.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/VNCD-PROJECT.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/include/maneuvers/IdleManeuver.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/msg/packets/platoonCreateRequest.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/msg/packets/platoonCreateRequestACK.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/maneuvers/IdleManeuver.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.qtenvrc" beforeDir="false" afterPath="$PROJECT_DIR$/.qtenvrc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake/omnetpp" beforeDir="false" afterPath="$PROJECT_DIR$/cmake/omnetpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake/omnetpp/AddOppRun.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/cmake/omnetpp/AddOppRun.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/MergeManeuver.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/MergeManeuver.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/omnetpp/opp_cmake.py" beforeDir="false" afterPath="$PROJECT_DIR$/cmake/omnetpp/opp_cmake.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/ApplicationAdapter.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/ApplicationAdapter.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/MergeManeuver.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/maneuvers/MergeManeuver.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/include/MyPlatooningApp.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/MyPlatooningApp.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/include/Protocol.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/Protocol.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/msg/packetHeader.msg" beforeDir="false" afterPath="$PROJECT_DIR$/msg/packets/packetHeader.msg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/omnetpp.ini" beforeDir="false" afterPath="$PROJECT_DIR$/omnetpp.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/MergeManeuver.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/MergeManeuver.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ApplicationAdapter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/ApplicationAdapter.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/MergeManeuver.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/maneuvers/MergeManeuver.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/MyPlatooningApp.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/MyPlatooningApp.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/PlatooningProtocol.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/PlatooningProtocol.cpp" afterDir="false" />
     </list>
@@ -62,39 +69,45 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;cf.advertisement.text.has.clang-format&quot;: &quot;true&quot;,
-    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/stefano/Projects/uni/vehicular-networks/plexe/src/plexe/apps/GeneralPlatooningApp.cc&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "cf.advertisement.text.has.clang-format": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "/mnt/shared/VNCD-PROJECT/msg/packets",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/msg" />
+    <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/msg/packets" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/include/maneuvers" />
+      <recent name="$PROJECT_DIR$/src/maneuvers" />
+      <recent name="$PROJECT_DIR$/msg/packets" />
+      <recent name="$PROJECT_DIR$/msg" />
     </key>
   </component>
   <component name="RunManager" selected="CMake Application.run_vncd">
-    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="Unnamed" type="CLion_Remote" singleton="false" version="1" remoteCommand="localhost:10000" symbolFile="" sysroot="">
       <debugger kind="GDB" isBundled="true" />
       <method v="2" />
+    </configuration>
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
     </configuration>
     <configuration name="debug_vncd" type="CMakeRunConfiguration" factoryName="Application" singleton="false" PROGRAM_PARAMS="1" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="VNCD_PROJECT" TARGET_NAME="debug_vncd" CONFIG_NAME="Debug" RUN_PATH="/bin/echo">
       <envs>
@@ -145,6 +158,7 @@
   </component>
   <component name="UnknownFeatures">
     <option featureType="com.intellij.fileTypeFactory" implementationName="*.ini" />
+    <option featureType="com.intellij.fileTypeFactory" implementationName="*.msg" />
   </component>
   <component name="VCPKGProject">
     <isAutomaticEditVcpkgJson value="false" />

@@ -54,4 +54,9 @@ namespace plexe::vncd {
         }
     }
 
+    void ApplicationAdapter::setActiveManeuver(unique_ptr<plexe::Maneuver> maneuver) {
+        this->cur_maneuver = std::move(maneuver);
+        this->activeManeuver = this->cur_maneuver.get();
+    }
+
 }

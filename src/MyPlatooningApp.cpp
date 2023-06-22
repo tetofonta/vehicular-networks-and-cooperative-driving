@@ -10,12 +10,13 @@
 #include "plexe/messages/PlexeInterfaceControlInfo_m.h"
 #include "veins/base/utils/FindModule.h"
 #include "plexe/scenarios/ManeuverScenario.h"
-#include "MergeManeuver.h"
+#include "maneuvers/MergeManeuver.h"
+#include "maneuvers/IdleManeuver.h"
 
-template<typename T, typename U>
-unique_ptr<T> unique_dynamic_cast(U *ptr) {
-    if (T *p = dynamic_cast<T *>(ptr)) return unique_ptr<T>((T *) ptr);
-    return nullptr;
+template<typename T>
+unique_ptr<T> frame_cast(BaseFrame1609_4 *ptr) {
+    if (T *p = dynamic_cast<T *>(ptr->getEncapsulatedPacket())) return unique_ptr<T>((T *) ptr->decapsulate());
+    return unique_ptr<T>(nullptr);
 }
 
 namespace plexe::vncd {
@@ -25,13 +26,16 @@ namespace plexe::vncd {
         if (stage == 0 || stage > 1) return;
 
         //Beacon_type altready registred by BaseApp
+        this->protocol->registerApplication(PLATOON_NEGOTIATION_TYPE, gate("lowerLayerIn"), gate("lowerLayerOut"),
+                                            gate("lowerControlIn"), gate("lowerControlOut"));
         this->app_protocol = unique_ptr<PlatooningProtocol>(check_and_cast<PlatooningProtocol *>(this->protocol));
 
-        if (this->positionHelper->getId() == 0) {
-            this->app_protocol->startPlatoonAdvertisement();
-        }
+        this->app_protocol->startPlatoonAdvertisement();
         this->app_protocol->routePlatoonRequests(true);
-        this->activeManeuver = new MergeAtBack(this);
+        this->activeManeuver = new IdleManeuver(this);
+
+        this->evt_ManeuverEnd = make_unique<cMessage>("Maneuver End");
+        this->state = APP_LEADER_IDLE;
     }
 
     void MyPlatooningApp::sendUnicast(omnetpp::cPacket *msg, int destination) {
@@ -39,6 +43,16 @@ namespace plexe::vncd {
     }
 
     void MyPlatooningApp::handleSelfMsg(omnetpp::cMessage *p_msg) {
+        if(p_msg == this->evt_ManeuverEnd.get()){
+            if(this->getPlatoonRole() == PlatoonRole::LEADER) {
+                this->state = APP_LEADER_IDLE;
+                this->app_protocol->startPlatoonAdvertisement();
+            }
+            else this->state = APP_FOLLOWER_IDLE;
+            this->setActiveManeuver(std::make_unique<IdleManeuver>(this));
+            return;
+        }
+
         auto msg = unique_ptr<cMessage>(p_msg);
         ApplicationAdapter::handleSelfMsg(msg.release());
     }
@@ -48,25 +62,79 @@ namespace plexe::vncd {
         auto enc = frame->getEncapsulatedPacket();
         ASSERT2(enc, "received a BaseFrame1609_4 with nothing inside");
 
-        switch (enc->getKind()) {
-            case 12345: { //BEACON_TYPE
-                if (auto platoon_advertisement = dynamic_cast<PlatoonAdvertiseBeacon *>(enc)) {
-                    frame->decapsulate();
-                    if (getPlatoonRole() != PlatoonRole::LEADER) return;
-                    if (isInManeuver()) return;
+        if(enc->getKind() != PLATOON_NEGOTIATION_TYPE) return ApplicationAdapter::handleLowerMsg(frame.release());
 
-                    JoinManeuverParameters params{
-                            .platoonId = platoon_advertisement->getPlatoon_id(),
-                            .leaderId = (int) platoon_advertisement->getSenderAddress(),
-                            .position = -1,
-                    };
-                    this->activeManeuver->startManeuver(&params);
+        switch (this->state) {
+            case APP_LEADER_IDLE: {
+                if (auto adv = frame_cast<PlatoonAdvertiseBeacon>(frame.get())) {
+                    this->app_protocol->sendUnicast(
+                            this->buildPlatoonCreateRequest().get(),
+                            adv->getSenderAddress()
+                    );
+                    this->app_protocol->stopPlatoonAdvertisement();
+                    this->state = APP_NEGOTIATING;
+                    return;
+                }
+                if (auto req = frame_cast<PlatoonCreateRequest>(frame.get())) {
+                    this->app_protocol->sendUnicast(
+                            this->buildPlatoonCreateRequestACK(req.get()).get(),
+                            req->getSenderAddress()
+                    );
+                    this->setActiveManeuver(std::make_unique<MergeManeuver>(this, this->evt_ManeuverEnd.get()));
+                    if (!this->isLeader(req->getCoord())) {
+                        JoinManeuverParameters params{
+                                .platoonId = req->getPlatoonId(),
+                                .leaderId = req->getLeaderId(),
+                                .position = -1,
+                        };
+                        this->activeManeuver->startManeuver(&params);
+                    }
+                    this->app_protocol->stopPlatoonAdvertisement();
+                    this->state = APP_MANEUVERING;
+                    return;
                 }
                 break;
             }
+            case APP_NEGOTIATING: {
+                if (auto ack = frame_cast<PlatoonCreateRequestACK>(frame.get())) {
+                    this->setActiveManeuver(std::make_unique<MergeManeuver>(this, this->evt_ManeuverEnd.get()));
+                    if (!this->isLeader(ack->getCoord())) {
+                        JoinManeuverParameters params{
+                                .platoonId = ack->getPlatoonId(),
+                                .leaderId = ack->getLeaderId(),
+                                .position = -1,
+                        };
+                        this->activeManeuver->startManeuver(&params);
+                    }
+                    this->state = APP_MANEUVERING;
+                    return;
+                }
+            }
+            case APP_FOLLOWER_IDLE:
+            case APP_MANEUVERING:
+                break;
         }
-
-        if(frame->getEncapsulatedPacket()) ApplicationAdapter::handleLowerMsg(frame.release());
     }
+
+    unique_ptr<PlatoonCreateRequest> MyPlatooningApp::buildPlatoonCreateRequest() {
+        auto pkt = std::make_unique<PlatoonCreateRequest>("Platoon Create Request", PLATOON_NEGOTIATION_TYPE);
+        pkt->setLeaderId(this->positionHelper->getId());
+        pkt->setPlatoonId(this->positionHelper->getPlatoonId());
+        pkt->setCoord(this->mobility->getPositionAt(simTime()).x);
+        return pkt;
+    }
+
+    unique_ptr<PlatoonCreateRequestACK> MyPlatooningApp::buildPlatoonCreateRequestACK(PlatoonCreateRequest *req) {
+        auto pkt = std::make_unique<PlatoonCreateRequestACK>("Platoon Create Request ACK", PLATOON_NEGOTIATION_TYPE);
+        pkt->setLeaderId(this->isLeader(req->getCoord()) ? this->positionHelper->getId() : -1);
+        pkt->setPlatoonId(this->isLeader(req->getCoord()) ? this->positionHelper->getPlatoonId() : -1);
+        pkt->setCoord(this->mobility->getPositionAt(simTime()).x);
+        return pkt;
+    }
+
+    bool MyPlatooningApp::isLeader(double coord) {
+        return this->mobility->getPositionAt(simTime()).x > coord;
+    }
+
 
 }

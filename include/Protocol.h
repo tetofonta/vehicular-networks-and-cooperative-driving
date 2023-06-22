@@ -9,6 +9,8 @@
 #include "packets/platoonAdvertisementBeacon_m.h"
 #include "messages/PlatoonAdvertisementListenTimeout_m.h"
 
+static short PLATOON_NEGOTIATION_TYPE = 23344;
+
 using namespace std;
 namespace plexe::vncd {
 

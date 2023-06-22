@@ -5,8 +5,8 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/omnetpp ${PROJECT_SOURCE_DIR}/cmake/veins ${PROJECT_SOURCE_DIR}/cmake/plexe)
 
 set(OMNETPP_ROOT /opt/omnetpp)
-set(VEINS_ROOT ${PROJECT_SOURCE_DIR}/../veins)
-set(PLEXE_ROOT ${PROJECT_SOURCE_DIR}/../plexe)
+#set(VEINS_ROOT ${PROJECT_SOURCE_DIR}/../veins)
+#set(PLEXE_ROOT ${PROJECT_SOURCE_DIR}/../plexe)
 
 find_package(OmnetPP 6.0 REQUIRED)
 find_package(Veins REQUIRED)
@@ -25,16 +25,20 @@ set(SOURCES
         include/TrafficManager.h
         src/PlatooningProtocol.cpp
         include/Protocol.h
-        src/MergeManeuver.cpp include/MergeManeuver.h src/ApplicationAdapter.cpp include/ApplicationAdapter.h)
+        src/maneuvers/MergeManeuver.cpp
+        include/maneuvers/MergeManeuver.h
+        src/ApplicationAdapter.cpp
+        include/ApplicationAdapter.h
+        src/maneuvers/IdleManeuver.cpp
+        include/maneuvers/IdleManeuver.h)
 
 add_library(libvncd SHARED ${SOURCES})
 set_target_properties(libvncd PROPERTIES NED_FOLDERS networks:${VEINS_NED_DIR}:${PLEXE_NED_DIR})
 target_link_libraries(libvncd ${PLEXE_LINK_LIBRARY})
-generate_opp_message(msg/packetHeader.msg TARGET libvncd)
+generate_opp_message(msg/packets/packetHeader.msg TARGET libvncd)
 generate_opp_message(msg/packets/platoonAdvertisementBeacon.msg TARGET libvncd)
-#generate_opp_message(msg/PlatoonUnicast.msg TARGET libvncd)
-#generate_opp_message(msg/PlatoonCreateRequest.msg TARGET libvncd)
-#generate_opp_message(msg/PlatoonCreateAnswer.msg TARGET libvncd)
 generate_opp_message(msg/messages/PlatoonAdvertisementListenTimeout.msg TARGET libvncd)
+generate_opp_message(msg/packets/platoonCreateRequest.msg TARGET libvncd)
+generate_opp_message(msg/packets/platoonCreateRequestACK.msg TARGET libvncd)
 
 add_opp_run(vncd DEPENDENCY libvncd WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})

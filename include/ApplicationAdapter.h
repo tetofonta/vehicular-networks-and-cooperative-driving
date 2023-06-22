@@ -13,6 +13,8 @@
 namespace plexe::vncd {
     class ApplicationAdapter : public GeneralPlatooningApp {
     protected:
+        unique_ptr<Maneuver> cur_maneuver;
+
     public:
         ApplicationAdapter(): GeneralPlatooningApp(){};
         ~ApplicationAdapter() override = default;
@@ -25,6 +27,7 @@ namespace plexe::vncd {
 
     protected:
         void handleSelfMsg(cMessage* msg) override;
+        void setActiveManeuver(unique_ptr<Maneuver> maneuver);
     };
 
 }

@@ -10,11 +10,26 @@
 #include <plexe/apps/GeneralPlatooningApp.h>
 #include "Protocol.h"
 #include "ApplicationAdapter.h"
+#include "packets/platoonCreateRequest_m.h"
+#include "packets/platoonCreateRequestACK_m.h"
+
+typedef enum {
+    APP_LEADER_IDLE,
+    APP_FOLLOWER_IDLE,
+    APP_NEGOTIATING,
+    APP_MANEUVERING
+} vehicle_state_t;
 
 namespace plexe::vncd {
     class MyPlatooningApp : public ApplicationAdapter {
     private:
         unique_ptr<PlatooningProtocol> app_protocol;
+        unique_ptr<cMessage> evt_ManeuverEnd;
+        vehicle_state_t state;
+
+        unique_ptr<PlatoonCreateRequest> buildPlatoonCreateRequest();
+        unique_ptr<PlatoonCreateRequestACK> buildPlatoonCreateRequestACK(PlatoonCreateRequest * req);
+        bool isLeader(double coord);
 
     public:
         MyPlatooningApp() = default;
