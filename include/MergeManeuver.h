@@ -18,6 +18,8 @@ namespace plexe::vncd {
     class MergeManeuver : public MergeAtBack {
     public:
         explicit MergeManeuver(GeneralPlatooningApp * app): MergeAtBack(app) {};
+
+        void handleJoinFormationAck(const JoinFormationAck* msg) override;
     };
 }
 

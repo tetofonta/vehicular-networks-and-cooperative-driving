@@ -16,11 +16,12 @@ namespace plexe::vncd {
 
     private:
         unique_ptr<cMessage> evt_SendPlatoonAdvertiseBeacon;
+        unique_ptr<cMessage> evt_SendPlatooonBeacon;
         SimTime platoonAdvertiseBeaconInterval;
 
         void sendPlatoonAdvertisementBeacon();
-        unique_ptr<BaseFrame1609_4> encapsulate(int destinationAddress, cPacket * pkt, int kind);
-        unique_ptr<BaseFrame1609_4> buildPacket(int destinationAddress, PacketHeader * pkt, int kind);
+        unique_ptr<BaseFrame1609_4> encapsulate(int destinationAddress, cPacket * pkt);
+        unique_ptr<BaseFrame1609_4> buildPacket(int destinationAddress, cPacket * pkt);
 
         unique_ptr<PlatoonAdvertiseBeacon> createPlatoonAdvertisementBeacon();
         map<long, unique_ptr<PlatoonAdvertisementListenTimeout>> events;
@@ -41,8 +42,8 @@ namespace plexe::vncd {
 
         void initialize(int stage) override;
 
-        void sendBroadcast(PacketHeader * pkt, int kind);
-        void sendUnicast(PacketHeader * pkt, int kind, int destinationAddress);
+        void sendBroadcast(cPacket * pkt);
+        void sendUnicast(cPacket * pkt, int destinationAddress);
 
         void startPlatoonAdvertisement();
         void stopPlatoonAdvertisement();

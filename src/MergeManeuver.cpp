@@ -6,4 +6,8 @@
 
 namespace plexe::vncd{
 
+    void MergeManeuver::handleJoinFormationAck(const JoinFormationAck *msg) {
+
+    }
+
 }

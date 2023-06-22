@@ -23,36 +23,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a4064aea-407d-47ba-9ed1-009f9c225abb" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.gdbinit" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/msg/messages/PlatoonAdvertisementListenTimeout.msg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/msg/packetHeader.msg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/msg/packets/platoonAdvertisementBeacon.msg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/VNCD-PROJECT.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.qtenvrc" beforeDir="false" afterPath="$PROJECT_DIR$/.qtenvrc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/include/ApplicationAdapter.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ApplicationAdapter.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake/omnetpp" beforeDir="false" afterPath="$PROJECT_DIR$/cmake/omnetpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake/omnetpp/AddOppRun.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/cmake/omnetpp/AddOppRun.cmake" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/include/MergeManeuver.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/MergeManeuver.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/include/MyPlatooningApp.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/MyPlatooningApp.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/include/Protocol.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/Protocol.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/TrafficManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/TrafficManager.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/msg/InternalListenTimeout.msg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/msg/PlatoonCreateAnswer.msg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/msg/PlatoonCreateRequest.msg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/msg/PlatoonSearchCAM.msg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/msg/PlatoonUnicast.msg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/networks/protocols/PlatooningProtocol.ned" beforeDir="false" afterPath="$PROJECT_DIR$/networks/protocols/PlatooningProtocol.ned" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/networks/scenarios/Scenario.ned" beforeDir="false" afterPath="$PROJECT_DIR$/networks/scenarios/Scenario.ned" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/networks/traffic/TrafficManager.ned" beforeDir="false" afterPath="$PROJECT_DIR$/networks/traffic/TrafficManager.ned" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/omnetpp.ini" beforeDir="false" afterPath="$PROJECT_DIR$/omnetpp.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/MergeManeuver.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/MergeManeuver.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/MyPlatooningApp.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/MyPlatooningApp.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/PlatooningProtocol.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/PlatooningProtocol.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Scenario.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Scenario.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/TrafficManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/TrafficManager.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -88,6 +71,7 @@
     &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
     &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/stefano/Projects/uni/vehicular-networks/plexe/src/plexe/apps/GeneralPlatooningApp.cc&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -151,6 +135,8 @@
       <workItem from="1687359582134" duration="4488000" />
       <workItem from="1687364403473" duration="5000" />
       <workItem from="1687364412419" duration="15586000" />
+      <workItem from="1687430622203" duration="5667000" />
+      <workItem from="1687437504394" duration="2042000" />
     </task>
     <servers />
   </component>

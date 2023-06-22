@@ -9,9 +9,10 @@
 #include <plexe/maneuver/JoinManeuver.h>
 #include <plexe/apps/GeneralPlatooningApp.h>
 #include "Protocol.h"
+#include "ApplicationAdapter.h"
 
 namespace plexe::vncd {
-    class MyPlatooningApp : public GeneralPlatooningApp {
+    class MyPlatooningApp : public ApplicationAdapter {
     private:
         unique_ptr<PlatooningProtocol> app_protocol;
 
@@ -22,6 +23,7 @@ namespace plexe::vncd {
         void handleSelfMsg(cMessage* msg) override;
         void handleLowerMsg(cMessage* msg) override;
         void initialize(int stage) override;
+        void sendUnicast(omnetpp::cPacket *msg, int destination) override;
     };
 
     Define_Module(MyPlatooningApp)

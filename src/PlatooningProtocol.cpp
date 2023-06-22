@@ -26,7 +26,10 @@ namespace plexe::vncd {
 
         this->platoonAdvertiseBeaconInterval = SimTime(par("platoonAdvertisementInterval").doubleValue());
         this->evt_SendPlatoonAdvertiseBeacon = make_unique<cMessage>();
+        this->evt_SendPlatooonBeacon = make_unique<cMessage>();
         this->platooningFormationSpeedRange = par("platooningFormationSpeedRange").doubleValue();
+
+        scheduleAfter(uniform(0.001, this->beaconingInterval), evt_SendPlatooonBeacon.get());
     }
 
     void PlatooningProtocol::handleSelfMsg(cMessage *p_msg) {
@@ -36,32 +39,40 @@ namespace plexe::vncd {
             return;
         }
 
+        if(this->evt_SendPlatooonBeacon.get() == p_msg){
+            this->sendPlatooningMessage(-1);
+            scheduleAfter(this->beaconingInterval, this->evt_SendPlatooonBeacon.get());
+            return;
+        }
+
         if(auto interval = dynamic_cast<PlatoonAdvertisementListenTimeout *>(p_msg)){
             EV << "Platoon " << interval->getPlatoon() << " no heard for a long time..." << endl;
             this->events.erase(interval->getPlatoon());
         }
     }
 
-    unique_ptr<BaseFrame1609_4> PlatooningProtocol::encapsulate(int destinationAddress, cPacket * pkt, int kind){
-        auto wsm = veins::make_unique<BaseFrame1609_4>("", kind);
+    unique_ptr<BaseFrame1609_4> PlatooningProtocol::encapsulate(int destinationAddress, cPacket * pkt){
+        auto wsm = veins::make_unique<BaseFrame1609_4>("", pkt->getKind());
         wsm->setRecipientAddress(destinationAddress);
         wsm->setChannelNumber(static_cast<int>(Channel::cch));
         wsm->setUserPriority(priority);
         wsm->encapsulate(pkt);
         return wsm;
     }
-    unique_ptr<BaseFrame1609_4> PlatooningProtocol::buildPacket(int destinationAddress, PacketHeader *pkt, int kind) {
-        pkt->setSenderAddress(this->positionHelper->getLeaderId());
-        return this->encapsulate(destinationAddress, pkt, kind);
+    unique_ptr<BaseFrame1609_4> PlatooningProtocol::buildPacket(int destinationAddress, cPacket *pkt) {
+        if(auto unicast_packet = dynamic_cast<PacketHeader *>(pkt))
+            unicast_packet->setSenderAddress(this->positionHelper->getLeaderId());
+        return this->encapsulate(destinationAddress, pkt);
     }
 
-    void PlatooningProtocol::sendBroadcast(PacketHeader * pkt, int kind){
+    void PlatooningProtocol::sendBroadcast(cPacket * pkt){
         Enter_Method_Silent();
-        this->sendTo(this->buildPacket(-1, pkt, kind)->dup(), PlexeRadioInterfaces::ALL);
+        auto frame = this->buildPacket(-1, pkt->dup());
+        this->sendTo(frame.release(), PlexeRadioInterfaces::ALL);
     }
-    void PlatooningProtocol::sendUnicast(PacketHeader * pkt, int kind, int destinationAddress){
+    void PlatooningProtocol::sendUnicast(cPacket * pkt, int destinationAddress){
         Enter_Method_Silent();
-        auto frame = this->buildPacket(destinationAddress, pkt->dup(), kind);
+        auto frame = this->buildPacket(destinationAddress, pkt->dup());
         this->sendTo(frame.release(), PlexeRadioInterfaces::VEINS_11P);
     }
 
@@ -82,7 +93,7 @@ namespace plexe::vncd {
         return beacon;
     }
     void PlatooningProtocol::sendPlatoonAdvertisementBeacon() {
-        this->sendBroadcast(this->createPlatoonAdvertisementBeacon().release(), BEACON_TYPE);
+        this->sendBroadcast(this->createPlatoonAdvertisementBeacon().release());
     }
 
     void PlatooningProtocol::routePlatoonRequests(bool state){
@@ -96,7 +107,10 @@ namespace plexe::vncd {
     }
     bool PlatooningProtocol::handlePlatoonAdvertisement(PlatoonAdvertiseBeacon *pkt) {
         if(!this->doRoutePlatoonRequests) return false;
-        if(!this->isPlatoonCompatible(pkt)) return false;
+        if(!this->isPlatoonCompatible(pkt)){
+            return false;
+            EV_ERROR << "PLATOON INCOMPATIBLE :(" << endl;
+        }
 
         if(!this->events.contains(pkt->getPlatoon_id())){
             EV << "Heard message " << pkt << " once" << endl;
@@ -138,5 +152,4 @@ namespace plexe::vncd {
 
         BaseProtocol::handleLowerMsg(frame.release());
     }
-
 }
