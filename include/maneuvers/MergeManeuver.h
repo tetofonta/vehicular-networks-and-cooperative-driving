@@ -25,6 +25,7 @@ namespace plexe::vncd {
         }
 
         void handleJoinFormationAck(const JoinFormationAck* msg) override;
+        void handleJoinFormation(const JoinFormation* msg) override;
     };
 }
 

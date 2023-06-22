@@ -91,6 +91,7 @@ namespace plexe::vncd {
         beacon->setPlatoon_id(this->positionHelper->getPlatoonId());
         beacon->setPlatoon_speed(this->mobility->getSpeed());
         beacon->setPlatoon_size(this->positionHelper->getPlatoonSize());
+        beacon->setCoords(this->mobility->getPositionAt(simTime()).x);
         return beacon;
     }
     void PlatooningProtocol::sendPlatoonAdvertisementBeacon() {
@@ -100,21 +101,30 @@ namespace plexe::vncd {
     void PlatooningProtocol::routePlatoonRequests(bool state){
         this->doRoutePlatoonRequests = state;
     }
+
     bool PlatooningProtocol::isPlatoonCompatible(PlatoonAdvertiseBeacon *pkt){
+        //same lane policy
         if(pkt->getLane() != this->traciVehicle->getLaneIndex()) return false;
 
+        //speed policy
         auto max_speed_delta = std::min(pkt->getPlatoon_speed(), this->traciVehicle->getSpeed()) * this->platooningFormationSpeedRange;
-        if(std::abs(pkt->getPlatoon_speed() - this->traciVehicle->getSpeed()) < max_speed_delta) return false;
+        if(std::abs(pkt->getPlatoon_speed() - this->traciVehicle->getSpeed()) > max_speed_delta) return false;
 
+        //platoon size policy
         if(this->maxPlatoonSize < pkt->getPlatoon_size() + this->positionHelper->getPlatoonSize()) return false;
+
+        //distance policy
+        if(std::abs(this->mobility->getPositionAt(simTime()).x - pkt->getCoords()) > 100) return false;
+
+
 
         return true;
     }
     bool PlatooningProtocol::handlePlatoonAdvertisement(PlatoonAdvertiseBeacon *pkt) {
         if(!this->doRoutePlatoonRequests) return false;
         if(!this->isPlatoonCompatible(pkt)){
-            return false;
             EV_ERROR << "PLATOON INCOMPATIBLE :(" << endl;
+            return false;
         }
 
         if(!this->events.contains(pkt->getPlatoon_id())){
@@ -144,7 +154,11 @@ namespace plexe::vncd {
     }
 
     PlatooningProtocol::PlatooningProtocol() {}
-    PlatooningProtocol::~PlatooningProtocol() {}
+    PlatooningProtocol::~PlatooningProtocol() {
+        BaseProtocol::~BaseProtocol();
+        if(this->evt_SendPlatoonAdvertiseBeacon->isScheduled()) cancelEvent(this->evt_SendPlatoonAdvertiseBeacon.get());
+        if(this->evt_SendPlatooonBeacon->isScheduled()) cancelEvent(this->evt_SendPlatooonBeacon.get());
+    }
 
     void PlatooningProtocol::handleLowerMsg(cMessage * p_msg){
         auto frame = unique_ptr<BaseFrame1609_4>(check_and_cast<BaseFrame1609_4*>(p_msg));

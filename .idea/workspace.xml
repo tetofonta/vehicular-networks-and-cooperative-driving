@@ -24,11 +24,18 @@
   <component name="ChangeListManager">
     <list default="true" id="a4064aea-407d-47ba-9ed1-009f9c225abb" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.qtenvrc" beforeDir="false" afterPath="$PROJECT_DIR$/.qtenvrc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake/omnetpp" beforeDir="false" afterPath="$PROJECT_DIR$/cmake/omnetpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake/omnetpp/AddOppRun.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/cmake/omnetpp/AddOppRun.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/MyPlatooningApp.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/MyPlatooningApp.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/maneuvers/MergeManeuver.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/maneuvers/MergeManeuver.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/msg/packets/platoonAdvertisementBeacon.msg" beforeDir="false" afterPath="$PROJECT_DIR$/msg/packets/platoonAdvertisementBeacon.msg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/networks/protocols/PlatooningProtocol.ned" beforeDir="false" afterPath="$PROJECT_DIR$/networks/protocols/PlatooningProtocol.ned" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/omnetpp.ini" beforeDir="false" afterPath="$PROJECT_DIR$/omnetpp.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/MyPlatooningApp.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/MyPlatooningApp.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/PlatooningProtocol.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/PlatooningProtocol.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TrafficManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/TrafficManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/maneuvers/MergeManeuver.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/maneuvers/MergeManeuver.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -85,15 +92,10 @@
       <recent name="$PROJECT_DIR$/msg" />
     </key>
   </component>
-  <component name="RunManager" selected="CMake Application.libvncd">
+  <component name="RunManager" selected="CMake Application.run_vncd">
     <configuration name="Unnamed" type="CLion_Remote" singleton="false" version="1" remoteCommand="localhost:10000" symbolFile="" sysroot="">
       <debugger kind="GDB" isBundled="true" />
       <method v="2" />
-    </configuration>
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
     </configuration>
     <configuration name="debug_vncd" type="CMakeRunConfiguration" factoryName="Application" singleton="false" PROGRAM_PARAMS="1" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="VNCD_PROJECT" TARGET_NAME="debug_vncd" CONFIG_NAME="Debug" RUN_PATH="/bin/echo">
       <envs>
@@ -136,7 +138,8 @@
       <workItem from="1687364412419" duration="15586000" />
       <workItem from="1687430622203" duration="5667000" />
       <workItem from="1687437504394" duration="2042000" />
-      <workItem from="1687464914473" duration="246000" />
+      <workItem from="1687464914473" duration="4573000" />
+      <workItem from="1687469699103" duration="2774000" />
     </task>
     <servers />
   </component>

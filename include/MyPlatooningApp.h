@@ -30,15 +30,18 @@ namespace plexe::vncd {
         unique_ptr<PlatoonCreateRequest> buildPlatoonCreateRequest();
         unique_ptr<PlatoonCreateRequestACK> buildPlatoonCreateRequestACK(PlatoonCreateRequest * req);
         bool isLeader(double coord);
+        double original_speed;
 
     public:
         MyPlatooningApp() = default;
+        ~MyPlatooningApp();
 
     protected:
         void handleSelfMsg(cMessage* msg) override;
         void handleLowerMsg(cMessage* msg) override;
         void initialize(int stage) override;
         void sendUnicast(omnetpp::cPacket *msg, int destination) override;
+        void startMergeManeuver(int platoon_id, int leader_id, bool leader);
     };
 
     Define_Module(MyPlatooningApp)

@@ -26,4 +26,9 @@ namespace plexe::vncd{
         this->app->scheduleAfter(0, this->evt_ManeuverEnd);
     }
 
+    void MergeManeuver::handleJoinFormation(const JoinFormation *msg) {
+        MergeAtBack::handleJoinFormation(msg);
+        this->app->scheduleAfter(0, this->evt_ManeuverEnd);
+    }
+
 }

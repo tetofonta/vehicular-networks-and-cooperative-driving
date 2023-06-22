@@ -34,6 +34,10 @@ namespace plexe::vncd {
         this->app_protocol->routePlatoonRequests(true);
         this->activeManeuver = new IdleManeuver(this);
 
+        this->original_speed = this->traciVehicle->getSpeed();
+
+        this->plexeTraciVehicle->setLaneChangeMode(DRIVER_CHOICE);
+
         this->evt_ManeuverEnd = make_unique<cMessage>("Maneuver End");
         this->state = APP_LEADER_IDLE;
     }
@@ -47,9 +51,11 @@ namespace plexe::vncd {
             if(this->getPlatoonRole() == PlatoonRole::LEADER) {
                 this->state = APP_LEADER_IDLE;
                 this->app_protocol->startPlatoonAdvertisement();
+                this->app_protocol->routePlatoonRequests(true);
+//                this->plexeTraciVehicle->setCruiseControlDesiredSpeed(this->original_speed);
             }
             else this->state = APP_FOLLOWER_IDLE;
-            this->setActiveManeuver(std::make_unique<IdleManeuver>(this));
+//            this->setActiveManeuver(std::make_unique<IdleManeuver>(this));
             return;
         }
 
@@ -72,6 +78,7 @@ namespace plexe::vncd {
                             adv->getSenderAddress()
                     );
                     this->app_protocol->stopPlatoonAdvertisement();
+                    this->app_protocol->routePlatoonRequests(false);
                     this->state = APP_NEGOTIATING;
                     return;
                 }
@@ -80,16 +87,9 @@ namespace plexe::vncd {
                             this->buildPlatoonCreateRequestACK(req.get()).get(),
                             req->getSenderAddress()
                     );
-                    this->setActiveManeuver(std::make_unique<MergeManeuver>(this, this->evt_ManeuverEnd.get()));
-                    if (!this->isLeader(req->getCoord())) {
-                        JoinManeuverParameters params{
-                                .platoonId = req->getPlatoonId(),
-                                .leaderId = req->getLeaderId(),
-                                .position = -1,
-                        };
-                        this->activeManeuver->startManeuver(&params);
-                    }
+                    this->startMergeManeuver(req->getPlatoonId(), req->getLeaderId(), this->isLeader(req->getCoord()));
                     this->app_protocol->stopPlatoonAdvertisement();
+                    this->app_protocol->routePlatoonRequests(false);
                     this->state = APP_MANEUVERING;
                     return;
                 }
@@ -97,15 +97,7 @@ namespace plexe::vncd {
             }
             case APP_NEGOTIATING: {
                 if (auto ack = frame_cast<PlatoonCreateRequestACK>(frame.get())) {
-                    this->setActiveManeuver(std::make_unique<MergeManeuver>(this, this->evt_ManeuverEnd.get()));
-                    if (!this->isLeader(ack->getCoord())) {
-                        JoinManeuverParameters params{
-                                .platoonId = ack->getPlatoonId(),
-                                .leaderId = ack->getLeaderId(),
-                                .position = -1,
-                        };
-                        this->activeManeuver->startManeuver(&params);
-                    }
+                    this->startMergeManeuver(ack->getPlatoonId(), ack->getLeaderId(), this->isLeader(ack->getCoord()));
                     this->state = APP_MANEUVERING;
                     return;
                 }
@@ -136,5 +128,19 @@ namespace plexe::vncd {
         return this->mobility->getPositionAt(simTime()).x > coord;
     }
 
+    MyPlatooningApp::~MyPlatooningApp(){
+        if(this->evt_ManeuverEnd->isScheduled()) cancelEvent(this->evt_ManeuverEnd.get());
+    }
 
+    void MyPlatooningApp::startMergeManeuver(int platoon_id, int leader_id, bool leader){
+        this->setActiveManeuver(std::make_unique<MergeManeuver>(this, this->evt_ManeuverEnd.get()));
+        if (!leader) {
+            JoinManeuverParameters params{
+                    .platoonId = platoon_id,
+                    .leaderId = leader_id,
+                    .position = -1,
+            };
+            this->activeManeuver->startManeuver(&params);
+        }
+    }
 }
