@@ -33,12 +33,12 @@ namespace plexe::vncd {
                 .id = findVehicleTypeIndex(this->platooningVType),
                 .lane = (int) uniform(0, this->nLanes),
                 .position = 5.0f,
-                .speed = (float) par("platoonInsertSpeed").doubleValue(),
+                .speed = 36 //(float) par("platoonInsertSpeed").doubleValue(),
         };
 
         VehicleInfo vehicleInfo{
                 .controller = ACC, //just not make crashes!
-                .distance = 2,
+                .distance = 5,
                 .headway = this->platoonLeaderHeadway,
                 .id = this->insertedCars,
                 .platoonId = this->insertedCars++,
@@ -55,7 +55,7 @@ namespace plexe::vncd {
         this->addVehicleToQueue(0, cur_vehicle);
 
         if (--this->nCars)
-            scheduleAfter(par("insertDelay").doubleValue() + (5/cur_vehicle.speed), this->evt_startInsertion.get());
+            scheduleAfter(par("insertDelay").doubleValue() + 4, /*+ (15/cur_vehicle.speed),*/ this->evt_startInsertion.get());
     }
 
     TrafficManager::~TrafficManager() {

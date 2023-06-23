@@ -29,17 +29,24 @@ namespace plexe::vncd {
         map<long, unique_ptr<PlatoonAdvertisementListenTimeout>> events;
 
         bool doRoutePlatoonRequests = false;
+        bool doAcceptPlatoons = false;
         double platooningFormationSpeedRange;
         uint8_t maxPlatoonSize;
 
     protected:
         void handleSelfMsg(cMessage *msg) override;
         void handleLowerMsg(cMessage* msg) override;
-
         bool handlePlatoonAdvertisement(PlatoonAdvertiseBeacon * pkt);
-
         bool isPlatoonCompatible(PlatoonAdvertiseBeacon * pkt);
+        void updateDistances(PlatoonAdvertisementListenTimeout * interval);
+
     public:
+        int front_platoon_id = -1;
+        int back_platoon_id = -1;
+        double front_distance = 10000;
+        double back_distance = 10000;
+        //todo fai getter... non avevo voglia!
+
         PlatooningProtocol();
         ~PlatooningProtocol() override;
 
@@ -52,6 +59,8 @@ namespace plexe::vncd {
         void stopPlatoonAdvertisement();
 
         void routePlatoonRequests(bool state);
+        void setPlatoonAccepting(bool val);
+
     };
 }
 

@@ -28,15 +28,17 @@ namespace plexe::vncd {
         //Beacon_type altready registred by BaseApp
         this->protocol->registerApplication(PLATOON_NEGOTIATION_TYPE, gate("lowerLayerIn"), gate("lowerLayerOut"),
                                             gate("lowerControlIn"), gate("lowerControlOut"));
-        this->app_protocol = unique_ptr<PlatooningProtocol>(check_and_cast<PlatooningProtocol *>(this->protocol));
+        this->app_protocol = check_and_cast<PlatooningProtocol *>(this->protocol);
 
         this->app_protocol->startPlatoonAdvertisement();
         this->app_protocol->routePlatoonRequests(true);
+        this->app_protocol->setPlatoonAccepting(true);
         this->activeManeuver = new IdleManeuver(this);
 
         this->original_speed = this->traciVehicle->getSpeed();
 
         this->plexeTraciVehicle->setLaneChangeMode(DRIVER_CHOICE);
+        this->plexeTraciVehicle->setCruiseControlDesiredSpeed(this->original_speed);
 
         this->evt_ManeuverEnd = make_unique<cMessage>("Maneuver End");
         this->state = APP_LEADER_IDLE;
@@ -52,10 +54,9 @@ namespace plexe::vncd {
                 this->state = APP_LEADER_IDLE;
                 this->app_protocol->startPlatoonAdvertisement();
                 this->app_protocol->routePlatoonRequests(true);
-//                this->plexeTraciVehicle->setCruiseControlDesiredSpeed(this->original_speed);
+                this->app_protocol->setPlatoonAccepting(true);
             }
             else this->state = APP_FOLLOWER_IDLE;
-//            this->setActiveManeuver(std::make_unique<IdleManeuver>(this));
             return;
         }
 
@@ -73,33 +74,66 @@ namespace plexe::vncd {
         switch (this->state) {
             case APP_LEADER_IDLE: {
                 if (auto adv = frame_cast<PlatoonAdvertiseBeacon>(frame.get())) {
+                    if(!this->isLeader(adv->getCoords())){
+                        if(this->someoneInFront()) break; //abort, incompatible.
+                        this->app_protocol->stopPlatoonAdvertisement();
+                    }
+
                     this->app_protocol->sendUnicast(
                             this->buildPlatoonCreateRequest().get(),
                             adv->getSenderAddress()
                     );
-                    this->app_protocol->stopPlatoonAdvertisement();
+
                     this->app_protocol->routePlatoonRequests(false);
                     this->state = APP_NEGOTIATING;
+                    EV << "RECEIVED BEACON, GOING TO APP_NEGOTIATING " << adv->getPlatoon_id() << endl;
                     return;
                 }
                 if (auto req = frame_cast<PlatoonCreateRequest>(frame.get())) {
+                    if(!this->isLeader(req->getCoord())){
+                        this->app_protocol->stopPlatoonAdvertisement();
+                    }
                     this->app_protocol->sendUnicast(
                             this->buildPlatoonCreateRequestACK(req.get()).get(),
                             req->getSenderAddress()
                     );
-                    this->startMergeManeuver(req->getPlatoonId(), req->getLeaderId(), this->isLeader(req->getCoord()));
-                    this->app_protocol->stopPlatoonAdvertisement();
-                    this->app_protocol->routePlatoonRequests(false);
-                    this->state = APP_MANEUVERING;
-                    return;
+
+                    if(this->isLeader(req->getCoord()) || !this->someoneInFront()){
+                        this->startMergeManeuver(req->getPlatoonId(), req->getLeaderId(), this->isLeader(req->getCoord()));
+                        this->app_protocol->routePlatoonRequests(false);
+                        this->app_protocol->setPlatoonAccepting(false);
+                        this->state = APP_MANEUVERING;
+                         EV << "RECEIVED REQUEST, GOING TO APP_MANEUVERING" << req->getPlatoonId() << endl;
+
+                        return;
+                    }
+
+                    this->state = APP_LEADER_IDLE;
+                    this->app_protocol->startPlatoonAdvertisement();
+                    this->app_protocol->routePlatoonRequests(true);
+                    this->app_protocol->setPlatoonAccepting(true);
+                    EV << "RECEIVED REQUEST, ABORTING BECAUSE SOMEONE IS IN FRONT APP_LEADER_IDLE" << req->getPlatoonId() << endl;
+
                 }
                 break;
             }
             case APP_NEGOTIATING: {
                 if (auto ack = frame_cast<PlatoonCreateRequestACK>(frame.get())) {
-                    this->startMergeManeuver(ack->getPlatoonId(), ack->getLeaderId(), this->isLeader(ack->getCoord()));
-                    this->state = APP_MANEUVERING;
-                    return;
+                    if(ack->getAccepted()){
+                        this->app_protocol->setPlatoonAccepting(false);
+                        this->startMergeManeuver(ack->getPlatoonId(), ack->getLeaderId(), this->isLeader(ack->getCoord()));
+                        this->state = APP_MANEUVERING;
+                        EV << "ACK ACCEPTED, APP_MANEUVERING" << ack->getPlatoonId() << this->isLeader(ack->getCoord()) << endl;
+
+                        return;
+                    }
+                    this->state = APP_LEADER_IDLE;
+                    this->app_protocol->routePlatoonRequests(true);
+                    this->app_protocol->setPlatoonAccepting(true);
+                    this->app_protocol->startPlatoonAdvertisement();
+                    EV << "ACK REFUSED, APP_LEADER_IDLE" << ack->getPlatoonId() << endl;
+
+
                 }
             }
             case APP_FOLLOWER_IDLE:
@@ -121,6 +155,7 @@ namespace plexe::vncd {
         pkt->setLeaderId(this->isLeader(req->getCoord()) ? this->positionHelper->getId() : -1);
         pkt->setPlatoonId(this->isLeader(req->getCoord()) ? this->positionHelper->getPlatoonId() : -1);
         pkt->setCoord(this->mobility->getPositionAt(simTime()).x);
+        pkt->setAccepted(this->isLeader(req->getCoord()) || !this->someoneInFront());
         return pkt;
     }
 
@@ -142,5 +177,13 @@ namespace plexe::vncd {
             };
             this->activeManeuver->startManeuver(&params);
         }
+    }
+
+    bool MyPlatooningApp::someoneInFront() {
+//        return false;
+        //prima di richiedere, e se devo andare avanti, controlla che non ci sia nessuno in mezzo alle palle
+        double radar_distance = 1000, rel_speed = 0;
+        this->plexeTraciVehicle->getRadarMeasurements(radar_distance, rel_speed);
+        return radar_distance < 250 && this->app_protocol->front_distance < radar_distance;
     }
 }

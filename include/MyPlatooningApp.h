@@ -23,13 +23,14 @@ typedef enum {
 namespace plexe::vncd {
     class MyPlatooningApp : public ApplicationAdapter {
     private:
-        unique_ptr<PlatooningProtocol> app_protocol;
+        PlatooningProtocol * app_protocol;
         unique_ptr<cMessage> evt_ManeuverEnd;
         vehicle_state_t state;
 
         unique_ptr<PlatoonCreateRequest> buildPlatoonCreateRequest();
         unique_ptr<PlatoonCreateRequestACK> buildPlatoonCreateRequestACK(PlatoonCreateRequest * req);
         bool isLeader(double coord);
+        bool someoneInFront();
         double original_speed;
 
     public:

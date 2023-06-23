@@ -5,7 +5,8 @@ packet PlatoonAdvertiseBeacon extends PacketHeader{
     unsigned int lane;
     uint8_t platoon_size;
     int platoon_id;
-    double coords
+    double coords;
+    bool accepting;
 
     //additional informations such as destination, number of members ecc..
 }
