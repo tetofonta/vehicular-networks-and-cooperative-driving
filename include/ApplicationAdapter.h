@@ -28,6 +28,7 @@ namespace plexe::vncd {
     protected:
         void handleSelfMsg(cMessage* msg) override;
         void setActiveManeuver(unique_ptr<Maneuver> maneuver);
+//        void logVehicleData(bool crashed) override;
     };
 
 }

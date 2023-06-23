@@ -55,6 +55,7 @@ namespace plexe::vncd {
                 this->app_protocol->startPlatoonAdvertisement();
                 this->app_protocol->routePlatoonRequests(true);
                 this->app_protocol->setPlatoonAccepting(true);
+                this->plexeTraciVehicle->setLaneChangeMode(DRIVER_CHOICE);
             }
             else this->state = APP_FOLLOWER_IDLE;
             return;
@@ -99,6 +100,7 @@ namespace plexe::vncd {
                     );
 
                     if(this->isLeader(req->getCoord()) || !this->someoneInFront()){
+                        this->plexeTraciVehicle->setLaneChangeMode(STAY_IN_CURRENT_LANE);
                         this->startMergeManeuver(req->getPlatoonId(), req->getLeaderId(), this->isLeader(req->getCoord()));
                         this->app_protocol->routePlatoonRequests(false);
                         this->app_protocol->setPlatoonAccepting(false);
@@ -121,6 +123,7 @@ namespace plexe::vncd {
                 if (auto ack = frame_cast<PlatoonCreateRequestACK>(frame.get())) {
                     if(ack->getAccepted()){
                         this->app_protocol->setPlatoonAccepting(false);
+                        this->plexeTraciVehicle->setLaneChangeMode(STAY_IN_CURRENT_LANE);
                         this->startMergeManeuver(ack->getPlatoonId(), ack->getLeaderId(), this->isLeader(ack->getCoord()));
                         this->state = APP_MANEUVERING;
                         EV << "ACK ACCEPTED, APP_MANEUVERING" << ack->getPlatoonId() << this->isLeader(ack->getCoord()) << endl;
@@ -130,6 +133,7 @@ namespace plexe::vncd {
                     this->state = APP_LEADER_IDLE;
                     this->app_protocol->routePlatoonRequests(true);
                     this->app_protocol->setPlatoonAccepting(true);
+                    this->plexeTraciVehicle->setLaneChangeMode(DRIVER_CHOICE);
                     this->app_protocol->startPlatoonAdvertisement();
                     EV << "ACK REFUSED, APP_LEADER_IDLE" << ack->getPlatoonId() << endl;
 

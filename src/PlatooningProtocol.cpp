@@ -47,38 +47,14 @@ namespace plexe::vncd {
         if (auto interval = dynamic_cast<PlatoonAdvertisementListenTimeout *>(p_msg)) {
             EV << "Platoon " << interval->getPlatoon() << " no heard for a long time..." << endl;
 
-            if(interval->getPlatoon() == this->back_platoon_id){
-                EV << "Rebuilding back distance" << endl;
-
-                this->back_platoon_id = -1;
-                this->back_distance = 10000;
-
-                for (const auto& i : this->events){
-                    if(interval->getPlatoon() == i.second->getPlatoon()) continue;
-                    if(i.second->getDistance() < 0 && i.second->getDistance() > this->back_distance){
-                        this->back_platoon_id = i.first;
-                        this->back_distance = i.second->getDistance();
-                    }
-                }
-            }
-            if(interval->getPlatoon() == this->front_platoon_id){
-                EV << "Rebuilding front distance" << endl;
-
-                this->front_platoon_id = -1;
-                this->front_distance = 10000;
-
-                for (const auto& i : this->events){
-                    if(interval->getPlatoon() == i.second->getPlatoon()) continue;
-                    if(i.second->getDistance() > 0 && i.second->getDistance() < this->front_distance){
-                        this->front_platoon_id = i.first;
-                        this->front_distance = i.second->getDistance();
-                    }
-                }
+            int platoon = interval->getPlatoon();
+            this->events.erase(interval->getPlatoon());
+            if(platoon == this->back_platoon_id || platoon == this->front_platoon_id){
+                this->updateDistances();
             }
 
             EV << "PLATOON IN FRONT " << this->front_platoon_id << " at " << this->front_distance << endl;
             EV << "PLATOON BEHIND " << this->back_platoon_id << " at " << this->back_distance << endl;
-            this->events.erase(interval->getPlatoon());
         }
     }
 
@@ -166,22 +142,23 @@ namespace plexe::vncd {
         return true;
     }
 
-    void PlatooningProtocol::updateDistances(PlatoonAdvertisementListenTimeout * interval){
-        if (interval->getLane() != this->traciVehicle->getLaneIndex()) return;
-        //update current distances from the front and back platoon.
-        if ((interval->getDistance() > 0 && this->front_distance > interval->getDistance()) ||
-            this->front_platoon_id == interval->getPlatoon()) {
-            this->front_distance = interval->getDistance();
-            this->front_platoon_id = interval->getPlatoon();
-            EV << "NEW PLATOON IN FRONT " << this->front_platoon_id << " at " << this->front_distance << endl;
-        } else if ((interval->getDistance() < 0 && this->back_distance > -interval->getDistance()) ||
-                   this->back_platoon_id == interval->getPlatoon()) {
-            this->back_distance = interval->getDistance();
-            this->back_platoon_id = interval->getPlatoon();
-            EV << "NEW PLATOON BEHIND " << this->back_platoon_id << " at " << this->back_distance << endl;
-        } else {
-            EV << "PLATOON IN FRONT " << this->front_platoon_id << " at " << this->front_distance << endl;
-            EV << "PLATOON BEHIND " << this->back_platoon_id << " at " << this->back_distance << endl;
+    void PlatooningProtocol::updateDistances(){
+
+        this->back_platoon_id = -1;
+        this->back_distance = 10000;
+        this->front_platoon_id = -1;
+        this->front_distance = 10000;
+
+        for (const auto& i : this->events){
+            if(i.second->getLane() != this->traciVehicle->getLaneIndex()) continue;
+            if(i.second->getDistance() < 0 && i.second->getDistance() > this->back_distance){
+                this->back_platoon_id = i.first;
+                this->back_distance = i.second->getDistance();
+            }
+            if(i.second->getDistance() > 0 && i.second->getDistance() < this->front_distance){
+                this->front_platoon_id = i.first;
+                this->front_distance = i.second->getDistance();
+            }
         }
     }
 
@@ -193,9 +170,9 @@ namespace plexe::vncd {
             interval->setCount(1);
             interval->setDistance(pkt->getCoords() - this->mobility->getPositionAt(simTime()).x);
             interval->setLane(pkt->getLane());
-            this->updateDistances(interval.get());
             scheduleAfter(5, interval.get());
             this->events[pkt->getPlatoon_id()] = std::move(interval);
+            this->updateDistances();
             return false;
         }
 
@@ -205,7 +182,6 @@ namespace plexe::vncd {
         interval->setDistance(pkt->getCoords() - this->mobility->getPositionAt(simTime()).x);
         interval->setLane(pkt->getLane());
         EV << "Heard message " << pkt << " " << (int) interval->getCount() << " times" << endl;
-        this->updateDistances(interval.get());
 
         auto route = false;
         if (interval->getCount() >= 3) {
@@ -214,6 +190,7 @@ namespace plexe::vncd {
         }
         scheduleAfter(5, interval.get());
         this->events[pkt->getPlatoon_id()] = std::move(interval);
+        this->updateDistances();
 
         if (route) {
             EV << "routing" << pkt << endl;

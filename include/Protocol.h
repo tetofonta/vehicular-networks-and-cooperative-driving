@@ -38,7 +38,7 @@ namespace plexe::vncd {
         void handleLowerMsg(cMessage* msg) override;
         bool handlePlatoonAdvertisement(PlatoonAdvertiseBeacon * pkt);
         bool isPlatoonCompatible(PlatoonAdvertiseBeacon * pkt);
-        void updateDistances(PlatoonAdvertisementListenTimeout * interval);
+        void updateDistances();
 
     public:
         int front_platoon_id = -1;

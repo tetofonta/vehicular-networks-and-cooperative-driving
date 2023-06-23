@@ -59,4 +59,9 @@ namespace plexe::vncd {
         this->activeManeuver = this->cur_maneuver.get();
     }
 
+//    void ApplicationAdapter::logVehicleData(bool crashed) {
+////        GeneralPlatooningApp::logVehicleData(false);
+//    }
+
+
 }
