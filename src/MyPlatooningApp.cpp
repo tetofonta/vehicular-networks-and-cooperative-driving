@@ -36,9 +36,10 @@ namespace plexe::vncd {
         this->activeManeuver = new IdleManeuver(this);
 
         this->original_speed = this->traciVehicle->getSpeed();
-
-        this->plexeTraciVehicle->setLaneChangeMode(DRIVER_CHOICE);
+        this->plexeTraciVehicle->setLaneChangeMode(STAY_IN_CURRENT_LANE);
         this->plexeTraciVehicle->setCruiseControlDesiredSpeed(this->original_speed);
+        this->plexeTraciVehicle->setActiveController(ACC);
+        this->traciVehicle->setSpeed(-1);
 
         this->evt_ManeuverEnd = make_unique<cMessage>("Maneuver End");
         this->state = APP_LEADER_IDLE;
@@ -55,7 +56,8 @@ namespace plexe::vncd {
                 this->app_protocol->startPlatoonAdvertisement();
                 this->app_protocol->routePlatoonRequests(true);
                 this->app_protocol->setPlatoonAccepting(true);
-                this->plexeTraciVehicle->setLaneChangeMode(DRIVER_CHOICE);
+                this->plexeTraciVehicle->setLaneChangeMode(STAY_IN_CURRENT_LANE);
+                this->plexeTraciVehicle->setCruiseControlDesiredSpeed(this->original_speed + uniform(-5, 5));
             }
             else this->state = APP_FOLLOWER_IDLE;
             return;
@@ -101,7 +103,8 @@ namespace plexe::vncd {
 
                     if(this->isLeader(req->getCoord()) || !this->someoneInFront()){
                         this->plexeTraciVehicle->setLaneChangeMode(STAY_IN_CURRENT_LANE);
-                        this->startMergeManeuver(req->getPlatoonId(), req->getLeaderId(), this->isLeader(req->getCoord()));
+                        this->plexeTraciVehicle->setActiveController(ACC);
+                        this->startMergeManeuver(req->getPlatoonId(), req->getLeaderId(), this->isLeader(req->getCoord()), std::abs(this->mobility->getPositionAt(simTime()).x - req->getCoord()));
                         this->app_protocol->routePlatoonRequests(false);
                         this->app_protocol->setPlatoonAccepting(false);
                         this->state = APP_MANEUVERING;
@@ -115,7 +118,6 @@ namespace plexe::vncd {
                     this->app_protocol->routePlatoonRequests(true);
                     this->app_protocol->setPlatoonAccepting(true);
                     EV << "RECEIVED REQUEST, ABORTING BECAUSE SOMEONE IS IN FRONT APP_LEADER_IDLE" << req->getPlatoonId() << endl;
-
                 }
                 break;
             }
@@ -124,7 +126,8 @@ namespace plexe::vncd {
                     if(ack->getAccepted()){
                         this->app_protocol->setPlatoonAccepting(false);
                         this->plexeTraciVehicle->setLaneChangeMode(STAY_IN_CURRENT_LANE);
-                        this->startMergeManeuver(ack->getPlatoonId(), ack->getLeaderId(), this->isLeader(ack->getCoord()));
+                        this->plexeTraciVehicle->setActiveController(ACC);
+                        this->startMergeManeuver(ack->getPlatoonId(), ack->getLeaderId(), this->isLeader(ack->getCoord()), std::abs(this->mobility->getPositionAt(simTime()).x - ack->getCoord()));
                         this->state = APP_MANEUVERING;
                         EV << "ACK ACCEPTED, APP_MANEUVERING" << ack->getPlatoonId() << this->isLeader(ack->getCoord()) << endl;
 
@@ -171,15 +174,19 @@ namespace plexe::vncd {
         if(this->evt_ManeuverEnd->isScheduled()) cancelEvent(this->evt_ManeuverEnd.get());
     }
 
-    void MyPlatooningApp::startMergeManeuver(int platoon_id, int leader_id, bool leader){
-        this->setActiveManeuver(std::make_unique<MergeManeuver>(this, this->evt_ManeuverEnd.get()));
+    void MyPlatooningApp::startMergeManeuver(int platoon_id, int leader_id, bool leader, double distance){
+        this->setActiveManeuver(std::make_unique<MergeManeuver>(this, this->evt_ManeuverEnd.get(), this->maneuverSpeedSignal, this->platoonSizeSignal));
         if (!leader) {
             JoinManeuverParameters params{
                     .platoonId = platoon_id,
                     .leaderId = leader_id,
                     .position = -1,
             };
-            this->activeManeuver->startManeuver(&params);
+            MergeManeuverParameters maneuver_params{
+                .params = params,
+                .distance = distance
+            };
+            this->activeManeuver->startManeuver(&maneuver_params);
         }
     }
 
@@ -188,6 +195,8 @@ namespace plexe::vncd {
         //prima di richiedere, e se devo andare avanti, controlla che non ci sia nessuno in mezzo alle palle
         double radar_distance = 1000, rel_speed = 0;
         this->plexeTraciVehicle->getRadarMeasurements(radar_distance, rel_speed);
-        return radar_distance < 250 && this->app_protocol->front_distance < radar_distance;
+        if (radar_distance < 250)
+            return this->app_protocol->front_distance < radar_distance;
+        return false; //no one in front?
     }
 }

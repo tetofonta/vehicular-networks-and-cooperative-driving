@@ -45,6 +45,8 @@ namespace plexe::vncd {
         // sumo vehicle type of platooning cars
         std::string platooningVType;
 
+        int prev_lane = -1;
+
     protected:
         void insertCars();
 

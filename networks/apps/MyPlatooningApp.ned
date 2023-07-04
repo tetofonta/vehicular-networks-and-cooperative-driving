@@ -8,6 +8,11 @@ simple MyPlatooningApp like BaseApp
         int headerLength @unit("bit") = default(0 bit);
         @display("i=block/app2");
         @class(plexe::vncd::MyPlatooningApp);
+
+        @signal[maneuverSpeed](type=double);
+        @statistic[maneuverSpeed](title="maneuverSpeed"; source="maneuverSpeed"; record=vector,stats; interpolationmode=none);
+        @signal[platoonSize](type=int);
+        @statistic[platoonSize](title="platoonSize"; source="platoonSize"; record=vector,stats; interpolationmode=none);
     gates:
         input lowerLayerIn;
         output lowerLayerOut;

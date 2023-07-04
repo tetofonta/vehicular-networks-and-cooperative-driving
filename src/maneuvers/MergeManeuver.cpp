@@ -21,14 +21,24 @@
 
 namespace plexe::vncd{
 
+    void MergeManeuver::startManeuver(const void *parameters) {
+        auto params = (MergeManeuverParameters *) parameters;
+        MergeAtBack::startManeuver(&params->params);
+        this->start_time = simTime();
+        this->startDistance = params->distance;
+    }
+
     void MergeManeuver::handleJoinFormationAck(const JoinFormationAck *msg) {
         MergeAtBack::handleJoinFormationAck(msg);
         this->app->scheduleAfter(0, this->evt_ManeuverEnd);
+        this->app->emit(this->maneuverSpeedSignal, this->startDistance/(simTime() - this->start_time).dbl());
+        this->app->emit(this->platoonSizeSignal, this->positionHelper->getPlatoonSize());
     }
 
     void MergeManeuver::handleJoinFormation(const JoinFormation *msg) {
         MergeAtBack::handleJoinFormation(msg);
         this->app->scheduleAfter(0, this->evt_ManeuverEnd);
+        this->app->emit(this->maneuverSpeedSignal, this->startDistance/(simTime() - this->start_time).dbl());
     }
 
 }

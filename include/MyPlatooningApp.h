@@ -33,16 +33,21 @@ namespace plexe::vncd {
         bool someoneInFront();
         double original_speed;
 
+
     public:
         MyPlatooningApp() = default;
         ~MyPlatooningApp();
+
+        simsignal_t maneuverSpeedSignal = registerSignal("maneuverSpeed");
+        simsignal_t platoonSizeSignal = registerSignal("platoonSize");
+
 
     protected:
         void handleSelfMsg(cMessage* msg) override;
         void handleLowerMsg(cMessage* msg) override;
         void initialize(int stage) override;
         void sendUnicast(omnetpp::cPacket *msg, int destination) override;
-        void startMergeManeuver(int platoon_id, int leader_id, bool leader);
+        void startMergeManeuver(int platoon_id, int leader_id, bool leader, double distance);
     };
 
     Define_Module(MyPlatooningApp)

@@ -122,7 +122,7 @@ namespace plexe::vncd {
         if (!this->doAcceptPlatoons || !pkt->getAccepting()) return false;
 
         //same lane policy
-        if (pkt->getLane() != this->traciVehicle->getLaneIndex()) return false;
+//        if (pkt->getLane() != this->traciVehicle->getLaneIndex()) return false;
 
         //speed policy
         auto max_speed_delta =
@@ -150,7 +150,7 @@ namespace plexe::vncd {
         this->front_distance = 10000;
 
         for (const auto& i : this->events){
-            if(i.second->getLane() != this->traciVehicle->getLaneIndex()) continue;
+//            if(i.second->getLane() != this->traciVehicle->getLaneIndex()) continue;
             if(i.second->getDistance() < 0 && i.second->getDistance() > this->back_distance){
                 this->back_platoon_id = i.first;
                 this->back_distance = i.second->getDistance();
