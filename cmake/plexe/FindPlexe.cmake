@@ -5,7 +5,7 @@ set(PLEXE_LINK_DBG_LIBRARY ${PLEXE_ROOT}/out/clang-debug/src/libplexe_dbg.so)
 set(PLEXE_LINK_REL_LIBRARY ${PLEXE_ROOT}/out/clang-release/src/libplexe.so)
 set(PLEXE_RUN_BIN ${PLEXE_ROOT}/bin/plexe_run)
 
-if(${CMAKE_BUILD_TYPE} EQUAL Release)
+if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
     set(PLEXE_LINK_LIBRARY ${PLEXE_LINK_REL_LIBRARY})
 else()
     set(PLEXE_LINK_LIBRARY ${PLEXE_LINK_DBG_LIBRARY})

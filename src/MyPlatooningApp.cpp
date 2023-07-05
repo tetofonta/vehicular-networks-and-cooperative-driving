@@ -199,4 +199,21 @@ namespace plexe::vncd {
             return this->app_protocol->front_distance < radar_distance;
         return false; //no one in front?
     }
+
+    void MyPlatooningApp::receiveSignal(cComponent* src, simsignal_t id, cObject* value, cObject* details){
+        if (id == Mac1609_4::sigRetriesExceeded) {
+            auto frame = check_and_cast<BaseFrame1609_4*>(value);
+            if(auto mm = dynamic_cast<ManeuverMessage *>(frame->getEncapsulatedPacket()))
+                activeManeuver->onFailedTransmissionAttempt(mm);
+            else {
+                activeManeuver->abortManeuver();
+                this->state = APP_LEADER_IDLE;
+                this->app_protocol->startPlatoonAdvertisement();
+                this->app_protocol->routePlatoonRequests(true);
+                this->app_protocol->setPlatoonAccepting(true);
+                this->plexeTraciVehicle->setLaneChangeMode(STAY_IN_CURRENT_LANE);
+                this->plexeTraciVehicle->setCruiseControlDesiredSpeed(this->original_speed + uniform(-5, 5));
+            }
+        }
+    }
 }

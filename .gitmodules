@@ -1,3 +1,9 @@
 [submodule "cmake/omnetpp"]
 	path = cmake/omnetpp
 	url = https://github.com/omnetpp/cmake.git
+[submodule "runmaker"]
+	path = runmaker
+	url = https://github.com/veins/runmaker
+[submodule "veins_scripts"]
+	path = veins_scripts
+	url = https://github.com/veins/veins_scripts

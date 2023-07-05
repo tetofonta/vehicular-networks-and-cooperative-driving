@@ -37,9 +37,9 @@ namespace plexe::vncd {
         };
 
         VehicleInfo vehicleInfo{
-                .controller = DRIVER, //just not make crashes!
-                .distance = 30,
-                .headway = this->platoonLeaderHeadway,
+                .controller = ACC,
+                .distance = 4,
+                .headway = this->platoonLeaderHeadway + 2,
                 .id = this->insertedCars,
                 .platoonId = this->insertedCars++,
                 .position = (int) cur_vehicle.position

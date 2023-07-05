@@ -1,8 +1,45 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/VNCD-PROJECT/results/SimpleHighNumberCACC_0.vec"/>
-        <input pattern="/VNCD-PROJECT/results/SimpleHighNumberCACC_0.sca"/>
+        <input pattern="results/SimpleHighNumberCACC_0.sca"/>
+        <input pattern="results/SimpleHighNumberCACC_0.vec"/>
+        <input pattern="results/SimpleHighNumberCACC_1.sca"/>
+        <input pattern="results/SimpleHighNumberCACC_1.vec"/>
+        <input pattern="results/SimpleHighNumberCACC_2.sca"/>
+        <input pattern="results/SimpleHighNumberCACC_2.vec"/>
+        <input pattern="results/SimpleHighNumberCACC_3.sca"/>
+        <input pattern="results/SimpleHighNumberCACC_3.vec"/>
+        <input pattern="results/SimpleHighNumberCACC_4.sca"/>
+        <input pattern="results/SimpleHighNumberCACC_4.vec"/>
+        <input pattern="results/SimpleHighNumberCACC_5.sca"/>
+        <input pattern="results/SimpleHighNumberCACC_5.vec"/>
+        <input pattern="results/SimpleHighNumberCACC_6.sca"/>
+        <input pattern="results/SimpleHighNumberCACC_6.vec"/>
+        <input pattern="results/SimpleHighNumberCACC_7.sca"/>
+        <input pattern="results/SimpleHighNumberCACC_7.vec"/>
+        <input pattern="results/SimpleHighNumberCACC_8.sca"/>
+        <input pattern="results/SimpleHighNumberCACC_8.vec"/>
+        <input pattern="results/SimpleHighNumberCACC_9.sca"/>
+        <input pattern="results/SimpleHighNumberCACC_9.vec"/>
+        <input pattern="results/SimpleHighNumberPLOEG_0.sca"/>
+        <input pattern="results/SimpleHighNumberPLOEG_0.vec"/>
+        <input pattern="results/SimpleHighNumberPLOEG_1.sca"/>
+        <input pattern="results/SimpleHighNumberPLOEG_1.vec"/>
+        <input pattern="results/SimpleHighNumberPLOEG_2.vec"/>
+        <input pattern="results/SimpleHighNumberPLOEG_3.sca"/>
+        <input pattern="results/SimpleHighNumberPLOEG_3.vec"/>
+        <input pattern="results/SimpleHighNumberPLOEG_4.sca"/>
+        <input pattern="results/SimpleHighNumberPLOEG_4.vec"/>
+        <input pattern="results/SimpleHighNumberPLOEG_5.sca"/>
+        <input pattern="results/SimpleHighNumberPLOEG_5.vec"/>
+        <input pattern="results/SimpleHighNumberPLOEG_6.sca"/>
+        <input pattern="results/SimpleHighNumberPLOEG_6.vec"/>
+        <input pattern="results/SimpleHighNumberPLOEG_7.sca"/>
+        <input pattern="results/SimpleHighNumberPLOEG_7.vec"/>
+        <input pattern="results/SimpleHighNumberPLOEG_8.sca"/>
+        <input pattern="results/SimpleHighNumberPLOEG_8.vec"/>
+        <input pattern="results/SimpleHighNumberPLOEG_9.sca"/>
+        <input pattern="results/SimpleHighNumberPLOEG_9.vec"/>
     </inputs>
     <charts/>
 </analysis>

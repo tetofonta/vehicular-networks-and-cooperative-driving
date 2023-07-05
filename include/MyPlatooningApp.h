@@ -48,6 +48,7 @@ namespace plexe::vncd {
         void initialize(int stage) override;
         void sendUnicast(omnetpp::cPacket *msg, int destination) override;
         void startMergeManeuver(int platoon_id, int leader_id, bool leader, double distance);
+        void receiveSignal(cComponent* src, simsignal_t id, cObject* value, cObject* details) override;
     };
 
     Define_Module(MyPlatooningApp)
