@@ -47,7 +47,7 @@ namespace plexe::vncd {
         double back_distance = 10000;
         //todo fai getter... non avevo voglia!
 
-        PlatooningProtocol();
+        PlatooningProtocol(): BaseProtocol() {};
         ~PlatooningProtocol() override;
 
         void initialize(int stage) override;

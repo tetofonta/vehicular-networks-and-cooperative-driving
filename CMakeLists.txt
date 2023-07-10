@@ -34,7 +34,7 @@ set(SOURCES
         include/maneuvers/IdleManeuver.h)
 
 add_library(libvncd SHARED ${SOURCES})
-set_target_properties(libvncd PROPERTIES NED_FOLDERS networks:${VEINS_NED_DIR}:${PLEXE_NED_DIR})
+set_target_properties(libvncd PROPERTIES NED_FOLDERS ./networks:${VEINS_NED_DIR}:${PLEXE_NED_DIR})
 target_link_libraries(libvncd ${PLEXE_LINK_LIBRARY})
 generate_opp_message(msg/packets/packetHeader.msg TARGET libvncd)
 generate_opp_message(msg/packets/platoonAdvertisementBeacon.msg TARGET libvncd)
@@ -44,4 +44,4 @@ generate_opp_message(msg/packets/platoonCreateRequestACK.msg TARGET libvncd)
 
 add_opp_run(vncd DEPENDENCY libvncd WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 
-
+add_custom_target(runmaker COMMAND sh ${PROJECT_SOURCE_DIR}/makerun.sh "${OMNETPP_ROOT}" "${PROJECT_SOURCE_DIR}/networks:${VEINS_NED_DIR}:${PLEXE_NED_DIR}" "$<TARGET_FILE:libvncd>")

@@ -12,6 +12,7 @@
   <component name="CMakeRunConfigurationManager">
     <generated>
       <config projectName="VNCD_PROJECT" targetName="run_vncd" />
+      <config projectName="VNCD_PROJECT" targetName="runmaker" />
       <config projectName="VNCD_PROJECT" targetName="libvncd" />
     </generated>
   </component>
@@ -22,22 +23,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a4064aea-407d-47ba-9ed1-009f9c225abb" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/runmaker" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/runs.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/veins_scripts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitmodules" beforeDir="false" afterPath="$PROJECT_DIR$/.gitmodules" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/makerun.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.qtenvrc" beforeDir="false" afterPath="$PROJECT_DIR$/.qtenvrc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimpleHighNumberCACC_0.anf" beforeDir="false" afterPath="$PROJECT_DIR$/SimpleHighNumberCACC_0.anf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimpleHighNumberPLOEG_0.anf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/analisys/Untitled.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/analisys/Untitled.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake/omnetpp" beforeDir="false" afterPath="$PROJECT_DIR$/cmake/omnetpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake/omnetpp/AddOppRun.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/cmake/omnetpp/AddOppRun.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake/plexe/FindPlexe.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/cmake/plexe/FindPlexe.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/MyPlatooningApp.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/MyPlatooningApp.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/omnetpp.ini" beforeDir="false" afterPath="$PROJECT_DIR$/omnetpp.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/MyPlatooningApp.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/MyPlatooningApp.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/TrafficManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/TrafficManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs.txt" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -94,12 +86,7 @@
       <recent name="$PROJECT_DIR$/msg" />
     </key>
   </component>
-  <component name="RunManager" selected="CMake Application.libvncd">
-    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
-      </method>
-    </configuration>
+  <component name="RunManager" selected="CMake Application.runmaker">
     <configuration name="Unnamed" type="CLion_Remote" singleton="false" version="1" remoteCommand="localhost:10000" symbolFile="" sysroot="">
       <debugger kind="GDB" isBundled="true" />
       <method v="2" />
@@ -125,10 +112,16 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
+    <configuration name="runmaker" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="VNCD_PROJECT" TARGET_NAME="runmaker" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
     <list>
       <item itemvalue="CMake Application.debug_vncd" />
       <item itemvalue="CMake Application.libvncd" />
       <item itemvalue="CMake Application.run_vncd" />
+      <item itemvalue="CMake Application.runmaker" />
       <item itemvalue="Remote Debug.Unnamed" />
     </list>
   </component>
@@ -152,6 +145,8 @@
       <workItem from="1687791599993" duration="9062000" />
       <workItem from="1688394422930" duration="3742000" />
       <workItem from="1688398843304" duration="1176000" />
+      <workItem from="1688586747533" duration="839000" />
+      <workItem from="1688988684231" duration="1000" />
     </task>
     <servers />
   </component>

@@ -199,10 +199,7 @@ namespace plexe::vncd {
         return false;
     }
 
-    PlatooningProtocol::PlatooningProtocol() {}
-
-    PlatooningProtocol::~PlatooningProtocol() {
-        BaseProtocol::~BaseProtocol();
+    PlatooningProtocol::~PlatooningProtocol(){
         if (this->evt_SendPlatoonAdvertiseBeacon->isScheduled())
             cancelEvent(this->evt_SendPlatoonAdvertiseBeacon.get());
         if (this->evt_SendPlatooonBeacon->isScheduled()) cancelEvent(this->evt_SendPlatooonBeacon.get());
