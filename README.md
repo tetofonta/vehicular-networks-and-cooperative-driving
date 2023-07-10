@@ -3,11 +3,12 @@
 
 Anno Accademico 2022/23, Stefano Fontana, Elena Tonini.
 
+[FINAL REPORT](VNCD.pdf)
 ----
 
 ## Build Instructions
 ### Clone
-First of all you should clone the repo with all its submodules
+First of all you should clone the repository with all its submodules
 ```bash
 $ git clone git@github.com:tetofonta/vehicular-networks-and-cooperative-driving.git --recursive
 ```
@@ -32,4 +33,14 @@ $ cmake --build $PWD/build --target libvncd -j $(nproc)
 
 ```bash
 $ cmake --build $PWD/build --target run_vncd
+```
+
+### Batch Build and Run
+
+```bash
+cd vehicular-networks-and-cooperative-driving
+cmake -B "${PWD}/build" -S "$PWD" -DCMAKE_BUILD_TYPE=Release
+cmake --build "${PWD}/build" --target libvncd -j $(nproc)
+cmake --build "${PWD}/build" --target runmaker
+runmaker4.py "${PWD}/build/runs.txt" -j $(nproc)
 ```
