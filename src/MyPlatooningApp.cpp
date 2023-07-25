@@ -36,7 +36,7 @@ namespace plexe::vncd {
         this->activeManeuver = new IdleManeuver(this);
 
         this->original_speed = this->traciVehicle->getSpeed();
-        this->plexeTraciVehicle->setLaneChangeMode(STAY_IN_CURRENT_LANE);
+        this->plexeTraciVehicle->setLaneChangeMode(DRIVER_CHOICE);
         this->plexeTraciVehicle->setCruiseControlDesiredSpeed(this->original_speed);
         this->plexeTraciVehicle->setActiveController(ACC);
         this->traciVehicle->setSpeed(-1);
@@ -56,7 +56,7 @@ namespace plexe::vncd {
                 this->app_protocol->startPlatoonAdvertisement();
                 this->app_protocol->routePlatoonRequests(true);
                 this->app_protocol->setPlatoonAccepting(true);
-                this->plexeTraciVehicle->setLaneChangeMode(STAY_IN_CURRENT_LANE);
+                this->plexeTraciVehicle->setLaneChangeMode(DRIVER_CHOICE);
                 this->plexeTraciVehicle->setCruiseControlDesiredSpeed(this->original_speed + uniform(-5, 5));
             }
             else this->state = APP_FOLLOWER_IDLE;

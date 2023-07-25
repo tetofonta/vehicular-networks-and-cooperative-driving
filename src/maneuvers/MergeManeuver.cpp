@@ -39,6 +39,7 @@ namespace plexe::vncd{
         MergeAtBack::handleJoinFormation(msg);
         this->app->scheduleAfter(0, this->evt_ManeuverEnd);
         this->app->emit(this->maneuverSpeedSignal, this->startDistance/(simTime() - this->start_time).dbl());
+
     }
 
 }
